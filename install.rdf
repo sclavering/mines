@@ -7,8 +7,8 @@
     <id>minesweeper</id>
 
     <name>Minesweeper</name>
-    <version>0.6</version>
-    <description>The classic game of Minesweeper and a hexagonal variant</description>
+    <version>0.7</version>
+    <description>The classic game, and a hexagonal variant</description>
 
     <creator>Stephen Clavering</creator>
     <homepageURL>http://clav.mozdev.org/</homepageURL>
