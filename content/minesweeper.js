@@ -128,14 +128,19 @@ var Game = {
   newLikeCurrent: function() {
     this.end();
     this.inProgress = true;
-    Grid.newGrid(this.width, this.height, this.mines);
+    this._newLikeCurrent();
     // counters
     this.squaresRevealed = 0;
     MineCounters.setAll(this.mines);
     // misc display stuff
     Timer.reset();
     gSmileyFace.setFace("normal");
-    Mouse.addHandlers();
+    addMouseHandlers();
+  },
+
+  // needed by mouseClick to silently start a new game if the first square clicked is a mine
+  _newLikeCurrent: function() {
+    Grid.newGrid(this.width, this.height, this.mines);
   },
 
   checkWon: function() {
@@ -155,7 +160,7 @@ var Game = {
     if(!this.inProgress) return;
     this.inProgress = false;
     Timer.stop();
-    Mouse.removeHandlers();
+    removeMouseHandlers();
   }
 }
 
@@ -305,7 +310,8 @@ var GridBase = {
 
     // we want to treat flagged tiles differently from reveal() (which is used by revealAround etc. too)
     el.onLeftClick = function() {
-      if(this.flags) this.unflag();
+      if(this.revealed) this.tryRevealAround();
+      else if(this.flags) this.unflag();
       else this.reveal();
     }
 
@@ -487,21 +493,22 @@ var SquareGrid = {
   },
 
   setAdjacents: function() {
+    const xmax = width - 1, ymax = height - 1;
     var width = this.width, height = this.height;
     for(var x = 0; x < width; x++) {
       for(var y = 0; y < height; y++) {
         var adjacent = [];
         if(x!=0) {
-          if(y!=height-1) adjacent.push(this.elements[x-1][y+1]);
+          if(y!=ymax) adjacent.push(this.elements[x-1][y+1]);
           if(y!=0) adjacent.push(this.elements[x-1][y-1]);
           adjacent.push(this.elements[x-1][y]);
         }
-        if(x!=width-1) {
-          if(y!=height-1) adjacent.push(this.elements[x+1][y+1]);
+        if(x!=xmax) {
+          if(y!=ymax) adjacent.push(this.elements[x+1][y+1]);
           if(y!=0) adjacent.push(this.elements[x+1][y-1]);
           adjacent.push(this.elements[x+1][y]);
         }
-        if(y!=height-1) adjacent.push(this.elements[x][y+1]);
+        if(y!=ymax) adjacent.push(this.elements[x][y+1]);
         if(y!=0) adjacent.push(this.elements[x][y-1]);
         this.elements[x][y].adjacent = adjacent;
       }
@@ -565,7 +572,7 @@ var MineCounters = {
   },
 
   increase: function(counter) {
-    var c = counter - 1; // arrays are 0 based, but we have no 0 counter
+    var c = counter - 1; // arrays are 0-based, but we have no 0 counter
     this.values[c]++;
     this.displays[c].value = this.values[c];
   },
@@ -596,62 +603,31 @@ var MineCounters = {
 
 
 
-// XXX try to stop using Grid.container
-var Mouse = {
-  left: false,
-  right: false,
-  middle: false,
-
-  addHandlers: function() {
-    Grid.container.addEventListener("mousedown", mouseDown, false);
-    Grid.container.addEventListener("mouseup", initialMouseUp, false);
-  },
-  removeHandlers: function() {
-    Grid.container.removeEventListener("mousedown", mouseDown, false);
-    Grid.container.removeEventListener("mouseup", mouseUp, false);
-  }
+function addMouseHandlers() {
+  Grid.container.onclick = mouseClick;
+  gIsFirstMouseClick = true; // xxx!
 }
 
-// starts a new game if a mine has been hit, starts the timer and passes the event on otherwise
-function initialMouseUp(e) {
-  var el = Grid.getEventTarget(e);
-  if(!el) return;
+function removeMouseHandlers() {
+  Grid.container.onclick = null;
+}
 
-  Grid.container.removeEventListener("mouseup", initialMouseUp, false);
-  if(el.mines) {
-    Game.newLikeCurrent();
-    initialMouseUp(e);
-  } else {
+var gIsFirstMouseClick = false;
+
+function mouseClick(e) {
+  const el = Grid.getEventTarget(e);
+
+  // make the first click always safe
+  // arguably should check it's the first *left*-click
+  if(gIsFirstMouseClick) {
+    gIsFirstMouseClick = false;
+    while(el.mines) Game._newLikeCurrent();
     Timer.start();
-    Grid.container.addEventListener("mouseup", mouseUp, false);
-    mouseUp(e);
   }
-}
 
-function mouseDown(e) {
-  if(e.button==0) {
-    if(e.shiftKey) Mouse.middle = true;
-    else if(e.ctrlKey) Mouse.right = true;
-    else Mouse.left = true;
-  } else if(e.button==2) {
-    Mouse.right = true;
-  } else {
-    Mouse.middle = true;
-  }
-}
-
-function mouseUp(e) {
-  var el = Grid.getEventTarget(e);
-  if(!el) return;
-  if(Mouse.left) {
-    if(Mouse.right) el.tryRevealAround();
-    else el.onLeftClick();
-  } else if(Mouse.right) {
+  if(e.button==2 || e.ctrlKey) {
     el.toggleFlag();
   } else {
-    el.tryRevealAround();
+    el.onLeftClick();
   }
-  Mouse.left = false;
-  Mouse.middle = false;
-  Mouse.right = false;
 }
