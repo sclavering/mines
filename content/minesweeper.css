@@ -5,19 +5,21 @@
   padding: 0;
 }
 
-#game-panel { background: #c6c6c6; }
-#top-panel { padding: 4px 6px; background: #c6c6c6; }
-
-/* border images */
-.image-border-horizontal { -moz-image-region: rect(40px 177px 52px 176px); }
-.image-border-vertical   { -moz-image-region: rect(53px 162px 54px 150px); }
-
-#top-left-corner  { -moz-image-region: rect(40px 162px 52px 150px); }
-#top-right-corner { -moz-image-region: rect(40px 175px 52px 163px); }
-#middle-left-junction  { -moz-image-region: rect(55px 162px 67px 150px); }
-#middle-right-junction { -moz-image-region: rect(55px 175px 67px 163px); }
-#bottom-left-corner  { -moz-image-region: rect(68px 162px 80px 150px); }
-#bottom-right-corner { -moz-image-region: rect(68px 175px 80px 163px); }
+#main-panel {
+  background: #c6c6c6;
+  border: 2px solid;
+  border-color: white #848484 #848484 white;
+  padding: 8px;
+}
+#game-panel,
+#top-panel {
+  border: 2px solid;
+  border-color: #848484 white white #848484;
+}
+#top-panel {
+  padding: 4px 6px;
+  margin-bottom: 8px;
+}
 
 /* hex images and column styles for correct alignment */
 #hex-grid > vbox[evencolumn] { margin-top: 8px; }
