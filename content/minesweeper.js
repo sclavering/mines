@@ -38,7 +38,6 @@ var Game = {
   mines: 10,
   nonMines: 0,
 
-  flagsPlaced: 0,
   squaresRevealed: 0,
   minesLeft: 0,
 
@@ -92,7 +91,6 @@ var Game = {
     this.inProgress = true;
     Grid.newGrid(this.width, this.height, this.mines);
     // counters
-    this.flagsPlaced = 0;
     this.squaresRevealed = 0;
     this.minesLeft = this.mines;
     // misc display stuff
@@ -264,24 +262,16 @@ var GridBase = {
 
     el.toggleFlag = function() {
       if(this.revealed) return;
-      if(this.flagged) this.unflag();
-      else this.flag();
-    }
-
-    el.flag = function() {
-      this.flagged = true;
-      Game.flagsPlaced++;
-      Game.minesLeft--;
+      if(this.flagged) {
+        this.flagged = false;
+        Game.minesLeft++;
+        this.setAppearance("button");
+      } else {
+        this.flagged = true;
+        Game.minesLeft--;
+        this.setAppearance("flag");
+      }
       MineCounter.update();
-      this.setAppearance("flag");
-    }
-
-    el.unflag = function() {
-      this.flagged = false;
-      Game.flagsPlaced--;
-      Game.minesLeft++;
-      MineCounter.update();
-      this.setAppearance("button");
     }
 
     el.reveal = function() {
@@ -344,9 +334,11 @@ var GridBase = {
     for(var x = 0; x < this.width; x++) {
       for(var y = 0; y < this.height; y++) {
         var el = this.elements[x][y];
-        if(el.isMine && !el.flagged) el.flag();
+        if(el.isMine && !el.flagged) el.setAppearance("flag");
       }
     }
+    Game.minesLeft = 0;
+    MineCounter.update();
   }
 }
 
