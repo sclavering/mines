@@ -6,7 +6,7 @@
 <!-- Firefox -->
 <menupopup id="menu_ToolsPopup">
   <menuitem id="minesweeper" label="Minesweeper" insertbefore="prefSep"
-      oncommand="toOpenWindowByType('minesweeper','chrome://minesweeper/content/');"/>
+      oncommand="toOpenWindowByType('minesweeper','chrome://minesweeper/content/','chrome,resizable=no');"/>
 </menupopup>
 
 <!-- Seamonkey -->

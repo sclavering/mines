@@ -7,13 +7,15 @@ const kCrazy = 1;
 const kWidths = [9,16,30];
 const kHeights = [9,16,16];
 
-const kMines = {
-  1: [[10],[40],[99]],
-  2: [[6,4],[30,10],[66,33]],
-  3: [[5,3,2],[22,12,8],[55,30,15]],
-  4: [[5,2,2,1],[18,8,8,6],[50,20,20,10]],
-  5: [[4,2,2,1,1],[14,10,8,5,3],[40,20,15,10,5]]
-};
+const kMines = [null,
+  [[10],[40],[100]],
+  [[6,4],[24,16],[60,40]],
+  [[5,3,2],[20,12,8],[50,30,20]],
+  [[4,3,2,1],[16,12,8,4],[40,30,20,10]],
+  [[4,2,2,1,1],[15,10,7,5,3],[40,24,18,12,6]],
+  [[3,2,2,1,1,1],[15,10,6,4,3,2],[35,25,16,11,8,5]],
+  [[2,2,2,1,1,1,1],[15,9,6,4,3,2,1],[30,24,18,12,8,5,3]]
+];
 
 
 var gCurrentDifficulty;
@@ -22,6 +24,7 @@ var gMinesPerTile;
 
 var gPrefs; // an nsIPrefBranch
 var gSmileyFace; // an <image/> being used as a button
+
 
 window.onload = function() {
   gPrefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService);
@@ -286,6 +289,18 @@ var GridBase = {
         MineCounters.decrease(this.flags);
         this.setAppearance("flag f"+this.flags);
       }
+    }
+
+    el.clearFlags = function() {
+      MineCounters.increase(this.flags);
+      this.flags = 0;
+      this.setAppearance("button");
+    }
+
+    // we want to treat flagged tiles differently from reveal() (which is used by revealAround etc. too)
+    el.onLeftClick = function() {
+      if(this.flags) this.clearFlags();
+      else this.reveal();
     }
 
     el.reveal = function() {
@@ -624,7 +639,7 @@ function mouseUp(e) {
   if(!el) return;
   if(Mouse.left) {
     if(Mouse.right) el.tryRevealAround();
-    else el.reveal();
+    else el.onLeftClick();
   } else if(Mouse.right) {
     el.toggleFlag();
   } else {

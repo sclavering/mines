@@ -12,10 +12,12 @@
 <!ENTITY hextiles "Hexagonal tiles">
 
 <!ENTITY minespertile "Mines per tile">
-<!ENTITY minespertile.one "One or fewer">
-<!ENTITY minespertile.two "Two or fewer">
-<!ENTITY minespertile.three "Three or fewer">
-<!ENTITY minespertile.four "Four or fewer">
-<!ENTITY minespertile.five "Five or fewer">
+<!ENTITY minespertile.1 "One or fewer">
+<!ENTITY minespertile.2 "Two or fewer">
+<!ENTITY minespertile.3 "Three or fewer">
+<!ENTITY minespertile.4 "Four or fewer">
+<!ENTITY minespertile.5 "Five or fewer">
+<!ENTITY minespertile.6 "Six or fewer">
+<!ENTITY minespertile.7 "Seven or fewer">
 
 <!ENTITY exit "Exit">

@@ -12,10 +12,12 @@
 <!ENTITY hextiles "Celdas hexagonales">
 
 <!ENTITY minespertile "Minas por celda">
-<!ENTITY minespertile.one "Una o menos">
-<!ENTITY minespertile.two "Dos o menos">
-<!ENTITY minespertile.three "Tres o menos">
-<!ENTITY minespertile.four "Cuatro o menos">
-<!ENTITY minespertile.five "Cinco o menos">
+<!ENTITY minespertile.1 "Una o menos">
+<!ENTITY minespertile.2 "Dos o menos">
+<!ENTITY minespertile.3 "Tres o menos">
+<!ENTITY minespertile.4 "Cuatro o menos">
+<!ENTITY minespertile.5 "Cinco o menos">
+<!ENTITY minespertile.6 "Seises o menos">
+<!ENTITY minespertile.7 "Siete o menos">
 
 <!ENTITY exit "Salir">

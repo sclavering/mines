@@ -28,11 +28,13 @@
 				<menuseparator/>
 				<menu label="&minespertile;" oncommand="setMinesPerTile(event.target.getAttribute('value'));">
 				  <menupopup id="minespertile-popup">
-				    <menuitem id="minespertile-1" type="radio" value="1" label="&minespertile.one;"/>
-				    <menuitem id="minespertile-2" type="radio" value="2" label="&minespertile.two;"/>
-				    <menuitem id="minespertile-3" type="radio" value="3" label="&minespertile.three;"/>
-				    <menuitem id="minespertile-4" type="radio" value="4" label="&minespertile.four;"/>
-				    <menuitem id="minespertile-5" type="radio" value="5" label="&minespertile.five;"/>
+				    <menuitem id="minespertile-1" type="radio" value="1" label="&minespertile.1;"/>
+				    <menuitem id="minespertile-2" type="radio" value="2" label="&minespertile.2;"/>
+				    <menuitem id="minespertile-3" type="radio" value="3" label="&minespertile.3;"/>
+				    <menuitem id="minespertile-4" type="radio" value="4" label="&minespertile.4;"/>
+				    <menuitem id="minespertile-5" type="radio" value="5" label="&minespertile.5;"/>
+				    <menuitem id="minespertile-6" type="radio" value="6" label="&minespertile.6;"/>
+				    <menuitem id="minespertile-7" type="radio" value="7" label="&minespertile.7;"/>
 				  </menupopup>
 				</menu>
 				<menuseparator/>
@@ -67,6 +69,14 @@
     <hbox align="center">
       <image class="f5 counter-icon"/>
       <label id="mine-counter-4"/>
+    </hbox>
+    <hbox align="center">
+      <image class="f6 counter-icon"/>
+      <label id="mine-counter-5"/>
+    </hbox>
+    <hbox align="center">
+      <image class="f7 counter-icon"/>
+      <label id="mine-counter-6"/>
     </hbox>
   </vbox>
 

@@ -97,16 +97,22 @@ colours for buttons:
 .f3 { -moz-image-region: rect(0 42px 14px 28px); }
 .f4 { -moz-image-region: rect(0 56px 14px 42px); }
 .f5 { -moz-image-region: rect(0 70px 14px 56px); }
+.f6 { -moz-image-region: rect(0 84px 14px 70px); }
+.f7 { -moz-image-region: rect(0 98px 14px 84px); }
 .m1 { -moz-image-region: rect(14px 14px 28px 0); }
 .m2 { -moz-image-region: rect(14px 28px 28px 14px); }
 .m3 { -moz-image-region: rect(14px 42px 28px 28px); }
 .m4 { -moz-image-region: rect(14px 56px 28px 42px); }
 .m5 { -moz-image-region: rect(14px 70px 28px 56px); }
+.m6 { -moz-image-region: rect(14px 84px 28px 70px); }
+.m7 { -moz-image-region: rect(14px 98px 28px 84px); }
 .e1 { -moz-image-region: rect(28px 14px 42px 0); }
 .e2 { -moz-image-region: rect(28px 28px 42px 14px); }
 .e3 { -moz-image-region: rect(28px 42px 42px 28px); }
 .e4 { -moz-image-region: rect(28px 56px 42px 42px); }
 .e5 { -moz-image-region: rect(28px 70px 42px 56px); }
+.e6 { -moz-image-region: rect(28px 84px 42px 70px); }
+.e7 { -moz-image-region: rect(28px 98px 42px 84px); }
 
 /* revealed tiles */
 .revealed { font-weight: bold; }
