@@ -549,6 +549,7 @@ var Timer = {
 
 var MineCounters = {
   values: [],
+  icons: [],
   displays: [],
   
   init: function() {
@@ -556,6 +557,7 @@ var MineCounters = {
     var elt = document.getElementById("mine-counter-0");
     while(elt) {
       this.displays.push(elt);
+      this.icons.push(elt.previousSibling);  // the <image/>
       elt = document.getElementById("mine-counter-"+(++i));
     }
   },
@@ -572,8 +574,7 @@ var MineCounters = {
   },
   
   resetAll: function() {
-    for(var i = 0; i < this.values.length; i++)
-      this.displays[i].value = 0;
+    for(var i = 0; i < this.values.length; i++) this.displays[i].value = 0;
   },
   setAll: function(newvals) {
     // we *do* have to copy the array
@@ -581,10 +582,10 @@ var MineCounters = {
     for(var i = 0; i < newvals.length; i++) {
       this.values[i] = newvals[i];
       this.displays[i].value = newvals[i];
-      this.displays[i].hidden = false;
+      this.displays[i].collapsed = this.icons[i].collapsed = false;
     }
     for(; i < this.displays.length; i++) {
-      this.displays[i].hidden = true;
+      this.displays[i].collapsed = this.icons[i].collapsed = true;
     }
   }
 }

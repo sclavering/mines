@@ -41,14 +41,18 @@
 </toolbox>
 
 <vbox id="main-panel">
-  <hbox id="top-panel">
+  <hbox id="top-panel" align="center">
     <image id="new-game-button" onclick="newGame();"/>
     <spacer flex="1"/>
-    <textbox id="mine-counter-0"/>
-    <textbox id="mine-counter-1"/>
-    <textbox id="mine-counter-2"/>
+    <!-- putting the image/label pairs in hboxes would be sane, but breaks -moz-image-region :s -->
+    <image class="f1 counter-icon"/>
+    <label id="mine-counter-0"/>
+    <image class="f2 counter-icon"/>
+    <label id="mine-counter-1"/>
+    <image class="f3 counter-icon"/>
+    <label id="mine-counter-2"/>
     <spacer flex="1"/>
-    <textbox id="timer"/>
+    <label id="timer"/>
   </hbox>
 
   <box id="game-panel">

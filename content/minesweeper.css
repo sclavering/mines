@@ -34,7 +34,12 @@ colours for buttons:
 #mine-counter-1,
 #mine-counter-2,
 #timer {
-  width: 6ex;
+  width: 4ex;
+}
+.counter-icon {
+  list-style-image: url(images.png);
+  width: 14px;
+  height: 14px;
 }
 
 
@@ -42,7 +47,6 @@ colours for buttons:
 /* new game button */
 #new-game-button {
   list-style-image: url(images.png);
-  background: #ebe8d8;
   border: 2px solid;
   -moz-border-top-colors: #fefefe #f0eee1;
   -moz-border-left-colors: #fefefe #f0eee1;
