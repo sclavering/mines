@@ -38,19 +38,11 @@
 
 <vbox id="main-panel">
   <hbox id="top-panel">
-    <hbox>
-      <image id="mine-counter-hundreds"/>
-      <image id="mine-counter-tens"/>
-      <image id="mine-counter-units"/>
-    </hbox>
+    <textbox id="mine-counter"/>
     <spacer flex="1"/>
     <image id="new-game-button" onclick="newGame();"/>
     <spacer flex="1"/>
-    <hbox>
-      <image id="timer-hundreds"/>
-      <image id="timer-tens"/>
-      <image id="timer-units"/>
-    </hbox>
+    <textbox id="timer"/>
   </hbox>
 
   <box id="game-panel">

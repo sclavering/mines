@@ -3,7 +3,6 @@ const SQUARE = "square";
 
 window.addEventListener("load",function() {
   Timer.init();
-  MineCounter.init();
   SquareGrid.init();
   HexGrid.init();
   Game.init();
@@ -36,18 +35,20 @@ var Game = {
   mines: 10,
   nonMines: 0,
 
-  squaresRevealed: 0,
   minesLeft: 0,
+  squaresRevealed: 0,
 
   inProgress: false,
 
   preferences: null,
 
-  // the smiley face button. there's nowhere better to handle it
+  // UI bits
   smileyButton: null,
+  mineCounter: null,
 
   init: function() {
     this.smileyButton = document.getElementById("new-game-button");
+    this.mineCounter = document.getElementById("mine-counter");
     // get last difficulty level used
     this.width = parseInt(document.documentElement.getAttribute("gamewidth"));
     this.height = parseInt(document.documentElement.getAttribute("gameheight"));
@@ -84,9 +85,8 @@ var Game = {
     Grid.newGrid(this.width, this.height, this.mines);
     // counters
     this.squaresRevealed = 0;
-    this.minesLeft = this.mines;
+    this.setMineCounter(this.mines);
     // misc display stuff
-    MineCounter.update();
     Timer.reset();
     this.setSmileyButton("normal");
     Mouse.addHandlers();
@@ -116,6 +116,19 @@ var Game = {
   setSmileyButton: function(state) {
     this.smileyButton.className = "new-game-button-"+state;
   },
+  
+  increaseMineCounter: function() {
+    this.minesLeft++;
+    this.mineCounter.value = this.minesLeft;
+  },
+  decreaseMineCounter: function() {
+    this.minesLeft--;
+    this.mineCounter.value = this.minesLeft;
+  },
+  setMineCounter: function(val) {
+    this.minesLeft = val;
+    this.mineCounter.value = this.minesLeft;
+  },
 
   // switch between square and hexagonal modes.
   // doesn't matter if it ends up switching hex->hex or square->square
@@ -132,7 +145,7 @@ var Game = {
   resizeWindow: function() {
     // sizeToContent() *will not reduce* the size of the window for some reason,
     // so we zero it ourselves first, which gives the correct overall result.
-    // (this bug was seen in the 20030616 build of Mozilla Firebird. nothing else has been tested)
+    // (bug observed in Mozilla Firebird 20030616 build. nothing else has been tested)
     window.innerWidth = 0;
     window.innerHeight = 0;
     window.sizeToContent();
@@ -256,14 +269,13 @@ var GridBase = {
       if(this.revealed) return;
       if(this.flagged) {
         this.flagged = false;
-        Game.minesLeft++;
+        Game.increaseMineCounter();
         this.setAppearance("button");
       } else {
         this.flagged = true;
-        Game.minesLeft--;
+        Game.decreaseMineCounter();
         this.setAppearance("flag");
       }
-      MineCounter.update();
     }
 
     el.reveal = function() {
@@ -329,8 +341,7 @@ var GridBase = {
         if(el.isMine && !el.flagged) el.setAppearance("flag");
       }
     }
-    Game.minesLeft = 0;
-    MineCounter.update();
+    Game.setMineCounter(0);
   }
 }
 
@@ -426,53 +437,22 @@ var SquareGrid = {
 
 
 
-// === mine counter =======================================
-var MineCounter = {
-  hundreds: null,
-  tens: null,
-  units: null,
-
-  init: function() {
-    this.hundreds = document.getElementById("mine-counter-hundreds");
-    this.tens  = document.getElementById("mine-counter-tens");
-    this.units = document.getElementById("mine-counter-units");
-  },
-
-  update: function() {
-    var negativeValue = (Game.minesLeft<0);
-    var value = Math.abs(Game.minesLeft);
-    // split value
-    var newUnits = value % 10;
-    var newTens = (value % 100 - newUnits) / 10;
-    var newHundreds = (value - 10*newTens - newUnits) / 100;
-    // change the images
-    this.hundreds.className = "counter-"+newHundreds;
-    this.tens.className = "counter-"+newTens;
-    this.units.className = "counter-"+newUnits;
-    // change first image for negative values
-    if(negativeValue) this.hundreds.className = "counter--";
-  }
-}
-
-
-
 // === timer ==============================================
 var Timer = {
   interval: null,
   time: 0,
-
-  hundredsDisplay: null,
-  tensDisplay: null,
-  unitsDisplay: null,
+  display: null,
 
   init: function() {
-    this.hundredsDisplay = document.getElementById("timer-hundreds");
-    this.tensDisplay  = document.getElementById("timer-tens");
-    this.unitsDisplay = document.getElementById("timer-units");
+    this.display = document.getElementById("timer");
   },
 
   start: function() {
-    this.interval = setInterval(incrementTimer, 1000);
+    this.interval = setInterval(this.increment, 1000);
+  },
+  
+  increment: function() {
+    Timer.display.value = (++Timer.time);
   },
 
   stop: function() {
@@ -482,23 +462,8 @@ var Timer = {
 
   reset: function() {
     this.time = 0;
-    this.display();
-  },
-
-  display: function() {
-    var value = this.time;
-    var newUnits = value % 10;
-    var newTens = (value % 100 - newUnits) / 10;
-    var newHundreds = (value - 10*newTens - newUnits) / 100;
-    // change the images
-    this.unitsDisplay.className = "counter-"+newUnits;
-    this.tensDisplay.className  = "counter-"+newTens;
-    this.hundredsDisplay.className = "counter-"+newHundreds;
+    this.display.value = 0;
   }
-}
-function incrementTimer() {
-  Timer.time++;
-  Timer.display();
 }
 
 
