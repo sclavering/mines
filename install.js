@@ -31,7 +31,7 @@ if(err == SUCCESS) {
   var jar = getFolder(folder, kJarFile);
 
   registerChrome(CONTENT | flag, jar, kContentFolder);
-  for(var in kLocaleFolders) registerChrome(LOCALE | flag, jar, kLocaleFolders[i]);
+  for(var i in kLocaleFolders) registerChrome(LOCALE | flag, jar, kLocaleFolders[i]);
   if(kSkinFolder) registerChrome(SKIN | flag, jar, kSkinFolder);
 
   err = performInstall();
