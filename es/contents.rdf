@@ -5,7 +5,7 @@
 
   <Seq about="urn:mozilla:locale:root">
     <li>
-      <Description about="urn:mozilla:locale:es">
+      <Description about="urn:mozilla:locale:es" c:name="es">
         <c:packages>
           <Seq about="urn:mozilla:locale:es:packages">
             <li resource="urn:mozilla:locale:es:minesweeper"/>

@@ -20,7 +20,7 @@
       <r:Description>
         <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
         <minVersion>0.9</minVersion>
-        <maxVersion>0.10</maxVersion>
+        <maxVersion>1.0</maxVersion>
       </r:Description>
     </targetApplication>
 
