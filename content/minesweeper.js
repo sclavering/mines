@@ -22,7 +22,7 @@ window.addEventListener("load",function() {
 
 
 function newGame(type) {
-  if(type) {
+  if(type || type===0) {
     document.documentElement.setAttribute("difficulty",type);
     Game.newGame(kWidths[type], kHeights[type], kMines[gCrazyMode][type]);
   } else {    
@@ -155,7 +155,7 @@ var Game = {
   // switch between square and hexagonal modes.
   // doesn't matter if it ends up switching hex->hex or square->square
   switchMode: function(newMode) {
-    document.documentElement.setAttribute("gamemode",newMode);
+    document.documentElement.setAttribute("shape",newMode);
     this.end();
     if(Grid) Grid.hide();
     Grid = (newMode==HEXAGONAL) ? HexGrid : SquareGrid;
