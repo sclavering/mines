@@ -1,12 +1,12 @@
 const kDisplayName = "Minesweeper";
 const kName = "minesweeper";
 const kPackage = "/clav.mozdev.org/minesweeper";
-const kVersion = "0.5.2";
+const kVersion = "0.6";
 
 const kJarFile = "minesweeper.jar";
 const kContentFolder = "content/";
 const kLocaleFolders = [];
-const kSkinFolder = ""; // leave blank if not applicable
+const kSkinFolder = "";
 
 
 var kMsg = "Do you wish to install "+kDisplayName+" to your profile?\n\nClick OK to install to your profile.\n\nClick Cancel if you want to install globally.";
@@ -31,8 +31,7 @@ if(err == SUCCESS) {
   var jar = getFolder(folder, kJarFile);
 
   registerChrome(CONTENT | flag, jar, kContentFolder);
-  for(var i = 0; i < kLocaleFolders.length; i++)
-    registerChrome(LOCALE | flag, jar, kLocaleFolders[i]);
+  for(var in kLocaleFolders) registerChrome(LOCALE | flag, jar, kLocaleFolders[i]);
   if(kSkinFolder) registerChrome(SKIN | flag, jar, kSkinFolder);
 
   err = performInstall();
@@ -43,8 +42,7 @@ if(err == SUCCESS) {
   }
 } else {
   alert("Failed to create " +kJarFile +"\n"
-    +"You probably don't have appropriate permissions \n"
-    +"(write access to firebird/chrome directory). \n"
-    +"_____________________________\nError code:" + err);
+    +"You probably don't have write access to mozilla/chrome/ directory).\n"
+    +"Error code: " + err);
   cancelInstall(err);
 }
