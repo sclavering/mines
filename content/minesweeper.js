@@ -29,7 +29,7 @@ window.onload = function() {
 
   // restore difficulty level
   gCurrentDifficulty = 1;
-  try { gCurrentDifficulty = gPrefs.getIntPref("difficulty-level"); } catch(e) { alert("couldnae load difficulty level!");}
+  try { gCurrentDifficulty = gPrefs.getIntPref("difficulty-level"); } catch(e) {}
   document.getElementById("dif-"+gCurrentDifficulty).setAttribute("checked","true");
 
   // restore tile shape
