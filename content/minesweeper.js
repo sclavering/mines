@@ -310,11 +310,12 @@ var GridBase = {
       if(this.revealed || this.flags) return;
       if(this.mines) {
         Game.lose();
-        this.setAppearance("highlighted-mine-"+this.mines);
+        this.setAppearance("explosion-"+this.mines);
       } else {
         this.revealed = true;
         Game.squaresRevealed++;
-        this.setAppearance(this.number+" revealed");
+        // "t" is an abitrary prefix used because classes can't start with a digit
+        this.setAppearance("revealed t"+this.number);
         if(this.number) this.setAttribute("label",this.number);
         // if its a blank square reveal round it
         else el.revealAround(el);
@@ -383,7 +384,7 @@ var HexGrid = {
   
   // prefixed onto the className of every <image> being used as a tile in the grid.
   // see the createTile method, and the setAppearance method it gives to tiles
-  tileClassPrefix: "hex-",
+  tileClassPrefix: "hex ",
 
   init: function() {
     this.container = document.getElementById("hex-grid");
@@ -477,7 +478,7 @@ var HexGrid = {
 var SquareGrid = {
   __proto__: GridBase,
   
-  tileClassPrefix: "square-",
+  tileClassPrefix: "square ",
 
   init: function() {
     this.container = document.getElementById("square-grid");
