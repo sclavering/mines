@@ -25,7 +25,7 @@ var instToProfile = !existsInApp && (existsInProfile || confirm(kMsg));
 var folder = instToProfile ? pchromef : chromef;
 var flag = instToProfile ? PROFILE_CHROME : DELAYED_CHROME;
 
-var err = addFile(kPackage, kVersion, kJarFile, folder, null)
+var err = addFile(kPackage, kVersion, 'chrome/'+kJarFile, folder, null)
 
 if(err == SUCCESS) {
   var jar = getFolder(folder, kJarFile);

@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns="http://www.mozilla.org/2004/em-rdf#">
+
+  <rdf:Description about="urn:mozilla:install-manifest">
+    <id>minesweeper</id>
+
+    <name>Minesweeper</name>
+    <version>0.6</version>
+    <description>The classic game of Minesweeper and a hexagonal variant</description>
+
+    <creator>Stephen Clavering</creator>
+    <homepageURL>http://clav.mozdev.org/</homepageURL>
+
+    <targetApplication>
+      <rdf:Description>
+        <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
+        <minVersion>0.9</minVersion>
+        <maxVersion>0.9+</maxVersion>
+      </rdf:Description>
+    </targetApplication>
+
+    <file>
+      <rdf:Description about="urn:mozilla:extension:file:minesweeper.jar">
+        <package>content/</package>
+      </rdf:Description>
+    </file>
+  </rdf:Description>
+</rdf:RDF>
