@@ -26,7 +26,15 @@ var gPrefs; // an nsIPrefBranch
 var gSmileyFace; // an <image/> being used as a button
 
 
+const ui = {
+  pauseCmd: "cmd.pause",
+  pauseMsg: "msg.pause"
+};
+
+
 window.onload = function() {
+  for(var i in ui) ui[i] = document.getElementById(ui[i]);
+
   gPrefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService);
   gPrefs = gPrefs.getBranch("games.minesweeper.");
 
@@ -99,6 +107,19 @@ function setTileShape(shape) {
 
 
 
+function togglePause() {
+  if(Game.paused) {
+    ui.pauseMsg.hidden = true;
+    Timer.start();
+    addMouseHandlers(false);
+  } else {
+    ui.pauseMsg.hidden = false;
+    Timer.stop();
+    removeMouseHandlers();
+  }
+  Game.paused = !Game.paused
+}
+
 
 var Game = {
   // these will overwritten by values read from attributes of the <window/>
@@ -114,6 +135,7 @@ var Game = {
   squaresRevealed: 0,
 
   inProgress: false,
+  paused: false,
 
   newGame: function(width, height, mines) {
     this.width = width;
@@ -135,7 +157,8 @@ var Game = {
     // misc display stuff
     Timer.reset();
     gSmileyFace.setFace("normal");
-    addMouseHandlers();
+    addMouseHandlers(true);
+    ui.pauseMsg.hidden = true;
   },
 
   // needed by mouseClick to silently start a new game if the first square clicked is a mine
@@ -159,8 +182,10 @@ var Game = {
   end: function() {
     if(!this.inProgress) return;
     this.inProgress = false;
+    this.paused = false;
     Timer.stop();
     removeMouseHandlers();
+    ui.pauseCmd.setAttribute("disabled", "true");
   }
 }
 
@@ -207,8 +232,10 @@ var GridBase = {
     for(var i = 1; i <= mines.length; i++) {
       var minesPlaced = 0;
       while(minesPlaced != mines[i-1]) {
-        x = this.getRandomInt(width);
-        y = this.getRandomInt(height);
+        do { x = Math.random(); } while(x == 1.0);
+        do { y = Math.random(); } while(y == 1.0);
+        x = Math.floor(x * width);
+        y = Math.floor(y * height);
         var el = this.elements[x][y];
         if(el.mines) continue;
         el.mines = i;
@@ -218,11 +245,6 @@ var GridBase = {
           el.adjacent[j].number += i;
       }
     }
-  },
-  getRandomInt: function(maxvalue) {
-    var num = Math.floor(Math.random()*maxvalue);
-    if(num == maxvalue) num--; // fix possibility where random number is 1 so num is too high
-    return num;
   },
 
   setSize: function(width, height) {
@@ -255,119 +277,15 @@ var GridBase = {
     return null;
   },
 
-  /* The appearance of tiles is controlled by their class attribute.  This always includes
-     "tile", and either "hex" or "square".  And will include one of "button", "flag f{n}",
-     "revealed r{n}" or "explosion e{n}" where {n} is a number */
-  createTile: function(x, y, classPrefix) {
-    var el = document.createElement("button");
-    // needed during event handling
-    el.x = x;
-    el.y = y;
-    // an array of adjacent elements, created after the grid of elements is created
-    el.adjacent = [];
-
-    var prefix = "tile "+classPrefix;
-    el.setAppearance = function(state) {
-      this.className = prefix+state;
-    };
-
-    // also used when starting a new game of the same size
-    el.reset = function() {
-      this.flags = 0;
-      this.revealed = false;
-      this.mines = 0;
-      this.number = 0;
-      this.removeAttribute("label");
-      this.setAppearance("button");
-    }
-    el.reset();
-
-    el.toggleFlag = function() {
-      if(this.revealed) return;
-      if(this.flags == Game.maxFlags) {
-        MineCounters.increase(this.flags);
-        this.flags = 0;
-        this.setAppearance("button");
-      } else {
-        if(this.flags) MineCounters.increase(this.flags);
-        this.flags++;
-        MineCounters.decrease(this.flags);
-        this.setAppearance("flag f"+this.flags);
-      }
-    }
-
-    // remove one flag
-    el.unflag = function() {
-      MineCounters.increase(this.flags);
-      var fl = --this.flags;
-      if(fl) {
-        MineCounters.decrease(fl);
-        this.setAppearance("flag f"+fl);
-      } else {
-        this.setAppearance("button");
-      }
-    }
-
-    // we want to treat flagged tiles differently from reveal() (which is used by revealAround etc. too)
-    el.onLeftClick = function() {
-      if(this.revealed) this.tryRevealAround();
-      else if(this.flags) this.unflag();
-      else this.reveal();
-    }
-
-    el.reveal = function() {
-      if(this.revealed || this.flags) return;
-      if(this.mines) {
-        Game.lose();
-        this.setAppearance("explosion e"+this.mines);
-      } else {
-        this.revealed = true;
-        Game.squaresRevealed++;
-        this.setAppearance("revealed r"+this.number);
-        if(this.number) this.setAttribute("label",this.number);
-        // if its a blank square reveal round it
-        else el.revealAround(el);
-        Game.checkWon();
-      }
-    }
-
-    // used both to reveal a whole area when a zero is revealed,
-    // and to reveal around an element when it is middle-clicked (or clicked with both buttons)
-    el.revealAround = function() {
-      for(var i = 0; i < this.adjacent.length; i++) {
-        var adj = this.adjacent[i];
-        if(!adj.revealed) adj.reveal();
-      }
-    }
-
-    // if enough flags have been placed around the element then the remaining unflagged
-    // squares will be revealed. this can kill the player if the flags are in the wrong place
-    el.tryRevealAround = function() {
-      if(this.revealed && this.hasEnoughFlags())
-        this.revealAround();
-    }
-
-    el.hasEnoughFlags = function() {
-      var flags = 0;
-      for(var i = 0; i < this.adjacent.length; i++) {
-        var f = this.adjacent[i].flags;
-        if(f) flags += f;
-      }
-      return (flags==this.number);
-    }
-
-    return el;
-  },
-
   updateForGameLost: function() {
     // show mines and incorrect flags
     for(var x = 0; x < this.width; x++) {
       for(var y = 0; y < this.height; y++) {
         var el = this.elements[x][y];
         if(el.mines) {
-          if(el.mines != el.flags) el.setAppearance("mine m"+el.mines);
+          if(el.mines != el.flags) el.className = el.classPrefix+"mine m"+el.mines;
         } else {
-          if(el.flags) el.setAppearance("cross");
+          if(el.flags) el.className = el.classPrefix+("cross");
         }
       }
     }
@@ -378,12 +296,116 @@ var GridBase = {
     for(var x = 0; x < this.width; x++) {
       for(var y = 0; y < this.height; y++) {
         var el = this.elements[x][y];
-        if(el.mines && !el.flags) el.setAppearance("flag f"+el.mines);
+        if(el.mines && !el.flags) el.className = el.classPrefix+"flag f"+el.mines;
       }
     }
     MineCounters.resetAll();
+  },
+
+  // The appearance of tiles is controlled by their class attribute.  This always includes
+  // "tile", and either "hex" or "square".  And will include one of "button", "flag f{n}",
+  // "revealed r{n}" or "explosion e{n}" where {n} is a number
+  createTile: function(x, y, classPrefix) {
+    var el = document.createElement("button");
+    el.x = x;
+    el.y = y;
+    el.classPrefix = "tile "+classPrefix;
+    // an array of adjacent elements, created after the grid of elements is created
+    el.adjacent = [];
+    for(var i in tileMethods) el[i] = tileMethods[i];
+    el.reset();
+    return el;
+  }
+};
+
+
+const tileMethods = {
+  reset: function() {
+      this.flags = 0;
+      this.revealed = false;
+      this.mines = 0;
+      this.number = 0;
+      this.removeAttribute("label");
+      this.className = this.classPrefix+"button";
+  },
+
+  toggleFlag: function() {
+      if(this.revealed) return;
+      if(this.flags == Game.maxFlags) {
+        MineCounters.increase(this.flags);
+        this.flags = 0;
+        this.className = this.classPrefix+"button";
+      } else {
+        if(this.flags) MineCounters.increase(this.flags);
+        this.flags++;
+        MineCounters.decrease(this.flags);
+        this.className = this.classPrefix+"flag f"+this.flags;
+      }
+  },
+
+    // remove one flag
+  unflag: function() {
+      MineCounters.increase(this.flags);
+      var fl = --this.flags;
+      if(fl) {
+        MineCounters.decrease(fl);
+        this.className = this.classPrefix+"flag f"+fl;
+      } else {
+        this.className = this.classPrefix+"button";
+      }
+  },
+
+    // we want to treat flagged tiles differently from reveal() (which is used by revealAround etc. too)
+  onLeftClick: function() {
+      if(this.revealed) this.tryRevealAround();
+      else if(this.flags) this.unflag();
+      else this.reveal();
+  },
+
+  reveal: function() {
+      if(this.revealed || this.flags) return;
+      if(this.mines) {
+        Game.lose();
+        this.className = this.classPrefix+"explosion e"+this.mines;
+      } else {
+        this.revealed = true;
+        Game.squaresRevealed++;
+        this.className = this.classPrefix+"revealed r"+this.number;
+        if(this.number) this.setAttribute("label",this.number);
+        // if its a blank square reveal round it
+        else this.revealAround();
+        Game.checkWon();
+      }
+  },
+
+    // used both to reveal a whole area when a zero is revealed,
+    // and to reveal around an element when it is middle-clicked (or clicked with both buttons)
+  revealAround: function() {
+      for(var i = 0; i < this.adjacent.length; i++) {
+        var adj = this.adjacent[i];
+        if(!adj.revealed) adj.reveal();
+      }
+  },
+
+    // if enough flags have been placed around the element then the remaining unflagged
+    // squares will be revealed. this can kill the player if the flags are in the wrong place
+  tryRevealAround: function() {
+      if(this.revealed && this.hasEnoughFlags())
+        this.revealAround();
+  },
+
+  hasEnoughFlags: function() {
+      var flags = 0;
+      for(var i = 0; i < this.adjacent.length; i++) {
+        var f = this.adjacent[i].flags;
+        if(f) flags += f;
+      }
+      return (flags==this.number);
   }
 }
+
+
+
 
 
 
@@ -391,7 +413,6 @@ var HexGrid = {
   __proto__: GridBase,
 
   // prefixed onto the className of every <image> being used as a tile in the grid.
-  // see the createTile method, and the setAppearance method it gives to tiles
   tileClassPrefix: "hex ",
 
   init: function() {
@@ -493,8 +514,8 @@ var SquareGrid = {
   },
 
   setAdjacents: function() {
+    const width = this.width, height = this.height;
     const xmax = width - 1, ymax = height - 1;
-    var width = this.width, height = this.height;
     for(var x = 0; x < width; x++) {
       for(var y = 0; y < height; y++) {
         var adjacent = [];
@@ -587,15 +608,14 @@ var MineCounters = {
   },
   setAll: function(newvals) {
     // we *do* have to copy the array
-    this.values = new Array(newvals.length);
-    for(var i = 0; i < newvals.length; i++) {
-      this.values[i] = newvals[i];
-      this.displays[i].value = newvals[i];
-      this.containers[i].collapsed = false;
+    const vals = this.values = newvals.slice(0), num = vals.length;
+    const ds = this.displays, cs = this.containers;
+    for(var i = 0; i != num; i++) {
+      ds[i].value = newvals[i];
+      cs[i].collapsed = false;
     }
-    for(; i < this.displays.length; i++) {
-      this.containers[i].collapsed = true;
-    }
+    // hide unwanted counters
+    for(; i != ds.length; i++) cs[i].collapsed = true;
   }
 }
 
@@ -603,9 +623,9 @@ var MineCounters = {
 
 
 
-function addMouseHandlers() {
+function addMouseHandlers(forGameStart) {
   Grid.container.onclick = mouseClick;
-  gIsFirstMouseClick = true; // xxx!
+  if(forGameStart) gIsFirstMouseClick = true;
 }
 
 function removeMouseHandlers() {
@@ -617,12 +637,14 @@ var gIsFirstMouseClick = false;
 function mouseClick(e) {
   const el = Grid.getEventTarget(e);
 
-  // make the first click always safe
-  // arguably should check it's the first *left*-click
+  // make the first click always safe (if it's a left-click)
   if(gIsFirstMouseClick) {
     gIsFirstMouseClick = false;
-    while(el.mines) Game._newLikeCurrent();
-    Timer.start();
+    if(e.button==0) {
+      while(el.mines) Game._newLikeCurrent();
+      Timer.start();
+      ui.pauseCmd.removeAttribute("disabled");
+    }
   }
 
   if(e.button==2 || e.ctrlKey) {

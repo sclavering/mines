@@ -10,13 +10,8 @@ colours for buttons:
 */
 
 #main-panel {
-  padding: 8px;
+  padding: 4px;
   background: #ebe8d8;
-  border: 2px solid;
-  -moz-border-top-colors: #f0eee1 #fefefe;
-  -moz-border-left-colors: #f0eee1 #fefefe;
-  -moz-border-right-colors: #716f64 #aba798;
-  -moz-border-bottom-colors: #716f64 #aba798;
 }
 #game-panel {
   border: 2px solid;
@@ -42,23 +37,7 @@ colours for buttons:
 
 
 
-/* new game button */
-#new-game-button {
-  list-style-image: url(images.png);
-  border: 2px solid;
-  -moz-border-top-colors: #fefefe #f0eee1;
-  -moz-border-left-colors: #fefefe #f0eee1;
-  -moz-border-right-colors: #716f64 #aba798;
-  -moz-border-bottom-colors: #716f64 #aba798;
-  padding: 3px;
-}
-#new-game-button:active {
-  -moz-border-top-colors: #716f64 #aba798;
-  -moz-border-left-colors: #716f64 #aba798;
-  -moz-border-right-colors: #fefefe #f0eee1;
-  -moz-border-bottom-colors: #fefefe #f0eee1;
-  padding: 4px 2px 2px 4px;
-}
+#new-game-button { list-style-image: url(images.png); }
 .new-game-button-normal { -moz-image-region: rect(42px 17px 59px 0); }
 .new-game-button-won    { -moz-image-region: rect(42px 34px 59px 17px); }
 .new-game-button-lost   { -moz-image-region: rect(42px 51px 59px 34px); }
@@ -80,6 +59,7 @@ colours for buttons:
 
 .tile {
   font-size: 14px;
+  font-weight: bold;
   overflow: hidden;
 }
 
@@ -112,8 +92,8 @@ colours for buttons:
 .e6 { -moz-image-region: rect(28px 84px 42px 70px); }
 .e7 { -moz-image-region: rect(28px 98px 42px 84px); }
 
+
 /* revealed tiles */
-.revealed { font-weight: bold; }
 .r1 { color: blue; }
 .r2 { color: #008400; }
 .r3 { color: red; }

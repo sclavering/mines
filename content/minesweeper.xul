@@ -5,48 +5,51 @@
 <!DOCTYPE window SYSTEM "chrome://minesweeper/locale/minesweeper.dtd">
 
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	windowtype="minesweeper"
-	id="minesweeper-window2"
-	title="&Minesweeper;"
-	persist="screenX screenY"
-	>
+  windowtype="minesweeper"
+  id="minesweeper-window2"
+  title="&Minesweeper;"
+  persist="screenX screenY"
+  >
 
 <script type="application/x-javascript" src="minesweeper.js"/>
 
+<commandset id="commands">
+  <command id="cmd.new" oncommand="newGame();"/>
+  <command id="cmd.pause" oncommand="togglePause();"/>
+</commandset>
+
 <toolbox id="main-toolbox">
-	<menubar id="main-menubar">
-		<menu id="game-menu" label="&gamemenu;">
-			<menupopup id="game-menu-popup">
-				<menuitem label="&newgame;" oncommand="newGame();"/>
-				<menuseparator/>
-				<menuitem type="radio" id="dif-0" name="difficulty" label="&beginner;" oncommand="newGame(0);"/>
-				<menuitem type="radio" id="dif-1" name="difficulty" label="&intermediate;" oncommand="newGame(1);"/>
-				<menuitem type="radio" id="dif-2" name="difficulty" label="&expert;" oncommand="newGame(2);"/>
-				<menuseparator/>
-				<menuitem type="radio" id="shape-square" name="shape" label="&squaretiles;" oncommand="newSquareGame();"/>
-				<menuitem type="radio" id="shape-hex"    name="shape" label="&hextiles;" oncommand="newHexagonalGame();"/>
-				<menuseparator/>
-				<menu label="&minespertile;" oncommand="setMinesPerTile(event.target.getAttribute('value'));">
-				  <menupopup id="minespertile-popup">
-				    <menuitem id="minespertile-1" type="radio" value="1" label="&minespertile.1;"/>
-				    <menuitem id="minespertile-2" type="radio" value="2" label="&minespertile.2;"/>
-				    <menuitem id="minespertile-3" type="radio" value="3" label="&minespertile.3;"/>
-				    <menuitem id="minespertile-4" type="radio" value="4" label="&minespertile.4;"/>
-				    <menuitem id="minespertile-5" type="radio" value="5" label="&minespertile.5;"/>
-				    <menuitem id="minespertile-6" type="radio" value="6" label="&minespertile.6;"/>
-				    <menuitem id="minespertile-7" type="radio" value="7" label="&minespertile.7;"/>
-				  </menupopup>
-				</menu>
-				<menuseparator/>
-				<menuitem label="&exit;" oncommand="window.close();"/>
-			</menupopup>
-		</menu>
-	</menubar>
+  <toolbar id="main-toolbar">
+    <toolbarbutton id="new-game-button" command="cmd.new" label="&newgame;"/>
+    <toolbarbutton id="btn.pause" command="cmd.pause" label="Pause"/>
+    <toolbarbutton type="menu" id="btn.settings" label="Settings">
+      <menupopup id="game-menu-popup">
+        <menuitem type="radio" id="dif-0" name="difficulty" label="&beginner;" oncommand="newGame(0);"/>
+        <menuitem type="radio" id="dif-1" name="difficulty" label="&intermediate;" oncommand="newGame(1);"/>
+        <menuitem type="radio" id="dif-2" name="difficulty" label="&expert;" oncommand="newGame(2);"/>
+        <menuseparator/>
+        <menuitem type="radio" id="shape-square" name="shape" label="&squaretiles;" oncommand="newSquareGame();"/>
+        <menuitem type="radio" id="shape-hex"    name="shape" label="&hextiles;" oncommand="newHexagonalGame();"/>
+        <menuseparator/>
+        <menu label="&minespertile;" oncommand="setMinesPerTile(event.target.getAttribute('value'));">
+          <menupopup id="minespertile-popup">
+            <menuitem id="minespertile-1" type="radio" value="1" label="&minespertile.1;"/>
+            <menuitem id="minespertile-2" type="radio" value="2" label="&minespertile.2;"/>
+            <menuitem id="minespertile-3" type="radio" value="3" label="&minespertile.3;"/>
+            <menuitem id="minespertile-4" type="radio" value="4" label="&minespertile.4;"/>
+            <menuitem id="minespertile-5" type="radio" value="5" label="&minespertile.5;"/>
+            <menuitem id="minespertile-6" type="radio" value="6" label="&minespertile.6;"/>
+            <menuitem id="minespertile-7" type="radio" value="7" label="&minespertile.7;"/>
+          </menupopup>
+        </menu>
+      </menupopup>
+    </toolbarbutton>
+  </toolbar>
 </toolbox>
+
 
 <hbox id="main-panel">
   <vbox id="status-panel" align="start">
-    <image id="new-game-button" onclick="newGame();"/>
 
     <label id="timer"/>
 
@@ -80,10 +83,11 @@
     </hbox>
   </vbox>
 
-  <box id="game-panel">
+  <stack id="game-panel">
     <hbox id="square-grid"/>
     <hbox id="hex-grid"/>
-  </box>
+    <label id="msg.pause" hidden="true" value="Paused" flex="1"/>
+  </stack>
 </hbox>
 
 </window>
