@@ -1,7 +1,7 @@
 const kDisplayName = "Minesweeper";
 const kName = "minesweeper";
 const kPackage = "/clav.mozdev.org/minesweeper";
-const kVersion = "0.5.1";
+const kVersion = "0.5.2";
 
 const kJarFile = "minesweeper.jar";
 const kContentFolder = "content/";

@@ -5,7 +5,13 @@
 
 <!-- Firebird -->
 <menupopup id="menu_ToolsPopup">
-  <menuitem id="minesweeper" label="Play Minesweeper" insertbefore="prefSep"
+  <menuitem id="minesweeper" label="Minesweeper" insertbefore="prefSep"
+      oncommand="toOpenWindowByType('minesweeper-hexsweeper','chrome://minesweeper/content/');"/>
+</menupopup>
+
+<!-- Seamonkey -->
+<menupopup id="windowPopup">
+  <menuitem id="minesweeper" label="Minesweeper" insertbefore="sep-window-list"
       oncommand="toOpenWindowByType('minesweeper-hexsweeper','chrome://minesweeper/content/');"/>
 </menupopup>
 
