@@ -22,6 +22,8 @@ var gCurrentDifficulty;
 var gTileShape;
 var gMinesPerTile;
 
+var gNoMinesAtEdges = false;
+
 var gPrefs; // an nsIPrefBranch
 var gSmileyFace; // an <image/> being used as a button
 
@@ -105,6 +107,11 @@ function setTileShape(shape) {
   newGame(gCurrentDifficulty);
 }
 
+function toggleNoMinesAtEdges(menuitem) {
+  gNoMinesAtEdges = menuitem.getAttribute("checked")=="true";
+  newGame();
+}
+
 
 
 function togglePause() {
@@ -119,6 +126,7 @@ function togglePause() {
   }
   Game.paused = !Game.paused
 }
+
 
 
 var Game = {
@@ -224,10 +232,12 @@ var GridBase = {
       this.setSize(width, height);
     } else {
       // clear every element in the grid
-      for(x = 0; x < this.width; x++)
-        for(y = 0; y < this.height; y++)
+      for(x = 0; x != width; ++x)
+        for(y = 0; y != height; ++y)
           this.elements[x][y].reset();
     }
+
+    const maxx = width - 1, maxy = height - 1;
     // create the required number of mines, and set the number for other elements
     for(var i = 1; i <= mines.length; i++) {
       var minesPlaced = 0;
@@ -238,6 +248,7 @@ var GridBase = {
         y = Math.floor(y * height);
         var el = this.elements[x][y];
         if(el.mines) continue;
+        if(gNoMinesAtEdges && (!x || x==maxx || !y || y==maxy)) continue;
         el.mines = i;
         minesPlaced++;
         // increment number for surrounding elements
