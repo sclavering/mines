@@ -80,6 +80,11 @@ colours for buttons:
   background: transparent;
 }
 
+.tile {
+  font-size: 14px;
+  overflow: hidden;
+}
+
 
 
 /* general tile styles */
