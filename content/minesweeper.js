@@ -111,8 +111,8 @@ var Game = {
   },
 
   lose: function() {
-    this.end();
     Grid.updateForGameLost();
+    this.end();
     this.setSmileyButton("lost");
   },
 
@@ -302,28 +302,24 @@ var GridBase = {
     // used both to reveal a whole area when a zero is revealed,
     // and to reveal around an element when it is middle-clicked (or clicked with both buttons)
     el.revealAround = function() {
-      for(var i = 0; i < el.adjacent.length; i++) el.adjacent[i].reveal();
+      for(var i = 0; i < this.adjacent.length; i++) {
+        var adj = this.adjacent[i];
+        if(!adj.revealed) adj.reveal();
+      }
     }
 
     // if enough flags have been placed around the element then the remaining unflagged
     // squares will be revealed. this can kill the player if the flags are in the wrong place
     el.tryRevealAround = function() {
-      if(el.revealed && el.hasEnoughFlags())
-        el.revealAround();
+      if(this.revealed && this.hasEnoughFlags())
+        this.revealAround();
     }
 
     el.hasEnoughFlags = function() {
       var flags = 0;
-      for(var i = 0; i < el.adjacent.length; i++)
-        if(el.adjacent[i].flagged) flags++;
-      return (flags==el.number);
-    }
-
-    el.updateForGameLost = function() {
-      if(this.isMine && !this.flagged)
-        this.setAppearance("mine");
-      else if(!this.isMine && this.flagged)
-        this.setAppearance("cross");
+      for(var i = 0; i < this.adjacent.length; i++)
+        if(this.adjacent[i].flagged) flags++;
+      return (flags==this.number);
     }
 
     return el;
@@ -331,16 +327,23 @@ var GridBase = {
 
   updateForGameLost: function() {
     // show mines and incorrect flags
-    for(var x = 0; x < this.width; x++)
-      for(var y = 0; y < this.height; y++)
-        this.elements[x][y].updateForGameLost();
+    for(var x = 0; x < this.width; x++) {
+      for(var y = 0; y < this.height; y++) {
+        var el = this.elements[x][y];
+        if(el.isMine) {
+          if(!el.flagged) el.setAppearance("mine");
+        } else {
+          if(el.flagged) el.setAppearance("cross");
+        }
+      }
+    }
   },
 
   updateForGameWon: function() {
     // flag remaining mines
     for(var x = 0; x < this.width; x++) {
       for(var y = 0; y < this.height; y++) {
-        var el = Grid.elements[x][y]
+        var el = this.elements[x][y];
         if(el.isMine && !el.flagged) el.flag();
       }
     }
@@ -351,6 +354,8 @@ var GridBase = {
 
 // XXX merge HexUtils into this ?
 var HexGrid = {
+  __proto__: GridBase,
+  
   // prefixed onto the className of every <image> being used as a tile in the grid.
   // see the createTile method, and the setAppearance method it gives to tiles
   tileClassPrefix: "hex-",
@@ -413,11 +418,12 @@ var HexGrid = {
     return this.getElement(el.x,el.y+1);
   }
 }
-HexGrid.__proto__ = GridBase;
 
 
 
 var SquareGrid = {
+  __proto__: GridBase,
+  
   tileClassPrefix: "square-",
 
   init: function() {
@@ -450,7 +456,6 @@ var SquareGrid = {
     return event.target;
   }
 }
-SquareGrid.__proto__ = GridBase;
 
 
 
@@ -605,7 +610,6 @@ var Mouse = {
 const HexUtils = {
   halfHeight: 0,
   slopeWidth: 0,
-//  bodyWidth:  0,
   tileWidth:  0,
   fullHeight: 0,
 
@@ -613,7 +617,6 @@ const HexUtils = {
     this.halfHeight = hh;
     this.fullHeight = 2 * hh;
     this.slopeWidth = sw;
-//    this.bodyWidth = bw;
     this.tileWidth = sw + bw; // width of the tiles in the grid we impose when calculating hex at given coords
   },
 
@@ -651,7 +654,7 @@ const HexUtils = {
       if(yintile * this.slopeWidth < xintile * this.halfHeight) {
         return {x: xtile, y: ytile}; // above
       } else {
-        return this.moveDownLeft(xtile,ytile,true); // below
+        return this.moveDownLeft(xtile,ytile); // below
       }
     }
     // in top left corner of tile.  use similar logic to above
@@ -659,17 +662,17 @@ const HexUtils = {
     if(yintile * this.slopeWidth > xintile * this.halfHeight) {
       return {x: xtile, y: ytile}; // below
     } else {
-      return this.moveUpLeft(xtile,ytile,true); // above
+      return this.moveUpLeft(xtile,ytile); // above
     }
   },
 
   // these functions deal with the different change in coords required to move to an
   // adjacent tile depending on whether the current tile is in an odd or even row
-  moveUpLeft: function(x, y, a) {
+  moveUpLeft: function(x, y) {
     var y2 = (x % 2 == 0) ? y : y-1;
     return {x: x-1, y: y2};
   },
-  moveDownLeft: function(x, y, a) {
+  moveDownLeft: function(x, y) {
     var y2 = (x % 2 == 0) ? y+1 : y;
     return {x: x-1, y: y2};
   },
