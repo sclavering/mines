@@ -4,14 +4,14 @@
      xmlns:c="http://www.mozilla.org/rdf/chrome#">
 
   <Seq about="urn:mozilla:locale:root">
-    <li resource="urn:mozilla:locale:es"/>
+    <li>
+      <Description about="urn:mozilla:locale:es">
+        <c:packages>
+          <Seq about="urn:mozilla:locale:es:packages">
+            <li resource="urn:mozilla:locale:es:minesweeper"/>
+          </Seq>
+        </c:packages>
+      </Description>
+    </li>
   </Seq>
-
-  <Description about="urn:mozilla:locale:es">
-    <c:packages>
-      <Seq about="urn:mozilla:locale:es:packages">
-        <li resource="urn:mozilla:locale:es:minesweeper"/>
-      </Seq>
-    </c:packages>
-  </Description>
 </RDF>

@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 
-<overlay id="MinesweeperOverlay"
-         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<overlay id="minesweeper" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
 <!-- Firefox -->
 <menupopup id="menu_ToolsPopup">
