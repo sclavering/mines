@@ -291,15 +291,21 @@ var GridBase = {
       }
     }
 
-    el.clearFlags = function() {
+    // remove one flag
+    el.unflag = function() {
       MineCounters.increase(this.flags);
-      this.flags = 0;
-      this.setAppearance("button");
+      var fl = --this.flags;
+      if(fl) {
+        MineCounters.decrease(fl);
+        this.setAppearance("flag f"+fl);
+      } else {
+        this.setAppearance("button");
+      }
     }
 
     // we want to treat flagged tiles differently from reveal() (which is used by revealAround etc. too)
     el.onLeftClick = function() {
-      if(this.flags) this.clearFlags();
+      if(this.flags) this.unflag();
       else this.reveal();
     }
 
