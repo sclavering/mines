@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:c="http://www.mozilla.org/rdf/chrome#">
+
+  <Seq about="urn:mozilla:locale:root">
+    <li resource="urn:mozilla:locale:es"/>
+  </Seq>
+
+  <Description about="urn:mozilla:locale:es">
+    <c:packages>
+      <Seq about="urn:mozilla:locale:es:packages">
+        <li resource="urn:mozilla:locale:es:minesweeper"/>
+      </Seq>
+    </c:packages>
+  </Description>
+</RDF>

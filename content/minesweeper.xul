@@ -1,10 +1,13 @@
 <?xml version="1.0"?>
+
 <?xml-stylesheet href="minesweeper.css" type="text/css"?>
+
+<!DOCTYPE window SYSTEM "chrome://minesweeper/locale/minesweeper.dtd">
 
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	windowtype="minesweeper"
 	id="minesweeper-window2"
-	title="Minesweeper"
+	title="&Minesweeper;"
 	persist="screenX screenY"
 	>
 
@@ -12,28 +15,28 @@
 
 <toolbox id="main-toolbox">
 	<menubar id="main-menubar">
-		<menu id="game-menu" label="Game">
+		<menu id="game-menu" label="&gamemenu;">
 			<menupopup id="game-menu-popup">
-				<menuitem label="New" oncommand="newGame();"/>
+				<menuitem label="&newgame;" oncommand="newGame();"/>
 				<menuseparator/>
-				<menuitem type="radio" id="dif-0" name="difficulty" label="Beginner" oncommand="newGame(0);"/>
-				<menuitem type="radio" id="dif-1" name="difficulty" label="Intermediate" oncommand="newGame(1);"/>
-				<menuitem type="radio" id="dif-2" name="difficulty" label="Expert" oncommand="newGame(2);"/>
+				<menuitem type="radio" id="dif-0" name="difficulty" label="&beginner;" oncommand="newGame(0);"/>
+				<menuitem type="radio" id="dif-1" name="difficulty" label="&intermediate;" oncommand="newGame(1);"/>
+				<menuitem type="radio" id="dif-2" name="difficulty" label="&expert;" oncommand="newGame(2);"/>
 				<menuseparator/>
-				<menuitem type="radio" id="shape-square" name="shape" label="Square tiles" oncommand="newSquareGame();"/>
-				<menuitem type="radio" id="shape-hex"    name="shape" label="Hexagonal tiles" oncommand="newHexagonalGame();"/>
+				<menuitem type="radio" id="shape-square" name="shape" label="&squaretiles;" oncommand="newSquareGame();"/>
+				<menuitem type="radio" id="shape-hex"    name="shape" label="&hextiles;" oncommand="newHexagonalGame();"/>
 				<menuseparator/>
-				<menu label="Mines per tile" oncommand="setMinesPerTile(event.target.getAttribute('value'));">
+				<menu label="&minespertile;" oncommand="setMinesPerTile(event.target.getAttribute('value'));">
 				  <menupopup id="minespertile-popup">
-				    <menuitem id="minespertile-1" type="radio" value="1" label="One or fewer"/>
-				    <menuitem id="minespertile-2" type="radio" value="2" label="Two or fewer"/>
-				    <menuitem id="minespertile-3" type="radio" value="3" label="Three or fewer"/>
-				    <menuitem id="minespertile-4" type="radio" value="4" label="Four or fewer"/>
-				    <menuitem id="minespertile-5" type="radio" value="5" label="Five or fewer"/>
+				    <menuitem id="minespertile-1" type="radio" value="1" label="&minespertile.one;"/>
+				    <menuitem id="minespertile-2" type="radio" value="2" label="&minespertile.two;"/>
+				    <menuitem id="minespertile-3" type="radio" value="3" label="&minespertile.three;"/>
+				    <menuitem id="minespertile-4" type="radio" value="4" label="&minespertile.four;"/>
+				    <menuitem id="minespertile-5" type="radio" value="5" label="&minespertile.five;"/>
 				  </menupopup>
 				</menu>
 				<menuseparator/>
-				<menuitem label="Exit" oncommand="window.close();"/>
+				<menuitem label="&exit;" oncommand="window.close();"/>
 			</menupopup>
 		</menu>
 	</menubar>

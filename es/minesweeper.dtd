@@ -1,0 +1,21 @@
+<!ENTITY Minesweeper "Buscaminas">
+
+<!ENTITY gamemenu "Juego">
+
+<!ENTITY newgame "Nuevo">
+
+<!ENTITY beginner "Principiante">
+<!ENTITY intermediate "Intermedio">
+<!ENTITY expert "Experto">
+
+<!ENTITY squaretiles "Celdas cuadradas">
+<!ENTITY hextiles "Celdas hexagonales">
+
+<!ENTITY minespertile "Minas por celda">
+<!ENTITY minespertile.one "Una o menos">
+<!ENTITY minespertile.two "Dos o menos">
+<!ENTITY minespertile.three "Tres o menos">
+<!ENTITY minespertile.four "Cuatro o menos">
+<!ENTITY minespertile.five "Cinco o menos">
+
+<!ENTITY exit "Salir">

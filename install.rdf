@@ -7,10 +7,12 @@
     <id>minesweeper</id>
 
     <name>Minesweeper</name>
-    <version>0.7</version>
+    <version>0.7.1</version>
     <description>The classic game, and a hexagonal variant</description>
 
     <creator>Stephen Clavering</creator>
+    <contributor>Percy Cabello (provided the Spanish translation)</contributor>
+
     <homepageURL>http://clav.mozdev.org/</homepageURL>
 
     <targetApplication>
@@ -24,6 +26,8 @@
     <file>
       <rdf:Description about="urn:mozilla:extension:file:minesweeper.jar">
         <package>content/</package>
+        <locale>en/</locale>
+        <locale>es/</locale>
       </rdf:Description>
     </file>
   </rdf:Description>
