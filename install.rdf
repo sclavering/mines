@@ -7,7 +7,7 @@
     <id>minesweeper</id>
 
     <name>Minesweeper</name>
-    <version>0.7.1</version>
+    <version>0.8</version>
     <description>The classic game, and a hexagonal variant</description>
 
     <creator>Stephen Clavering</creator>
