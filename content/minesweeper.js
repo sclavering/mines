@@ -82,6 +82,7 @@ var Game = {
       this.mines[i] = parseInt(this.mines[i]);
       this.nonMines -= this.mines[i];
     }
+    this.maxFlags = this.mines.length;
     // select the right menuitem on the game menu
     var difficulty = document.documentElement.getAttribute("difficulty");
     document.getElementById("dif-"+difficulty).setAttribute("checked","true");
@@ -252,7 +253,7 @@ var GridBase = {
         this.elements[x][y] = el;
         col.appendChild(el);
       }
-      if(x%2==0) col.setAttribute("evencolumn","true"); // needed for alignment in hexagonal games
+      if(x%2==0) col.className = "evencolumn"; // needed for alignment in hexagonal games
       this.container.appendChild(col);
     }
     this.setAdjacents();
@@ -265,9 +266,9 @@ var GridBase = {
     return null;
   },
 
-  /* The appearance of the tile at any given time is controlled by its class attribute.
-     This starts with either "square-" or "hex-" (the |classPrefix|) depending on the
-     type of tile, and ends with "button" "3" "flag" or something like that */
+  /* The appearance of tiles is controlled by their class attribute.  This always includes
+     "tile", and either "hex" or "square".  And will include one of "button", "flag f{n}",
+     "revealed r{n}" or "explosion e{n}" where {n} is a number */
   createTile: function(x, y, classPrefix) {
     var el = document.createElement("button");
     // needed during event handling
@@ -302,7 +303,7 @@ var GridBase = {
         if(this.flags) MineCounters.increase(this.flags);
         this.flags++;
         MineCounters.decrease(this.flags);
-        this.setAppearance("flag-"+this.flags);
+        this.setAppearance("flag f"+this.flags);
       }
     }
 
@@ -310,12 +311,11 @@ var GridBase = {
       if(this.revealed || this.flags) return;
       if(this.mines) {
         Game.lose();
-        this.setAppearance("explosion-"+this.mines);
+        this.setAppearance("explosion e"+this.mines);
       } else {
         this.revealed = true;
         Game.squaresRevealed++;
-        // "t" is an abitrary prefix used because classes can't start with a digit
-        this.setAppearance("revealed t"+this.number);
+        this.setAppearance("revealed r"+this.number);
         if(this.number) this.setAttribute("label",this.number);
         // if its a blank square reveal round it
         else el.revealAround(el);
@@ -357,7 +357,7 @@ var GridBase = {
       for(var y = 0; y < this.height; y++) {
         var el = this.elements[x][y];
         if(el.mines) {
-          if(el.mines != el.flags) el.setAppearance("mine-"+el.mines);
+          if(el.mines != el.flags) el.setAppearance("mine m"+el.mines);
         } else {
           if(el.flags) el.setAppearance("cross");
         }
@@ -370,7 +370,7 @@ var GridBase = {
     for(var x = 0; x < this.width; x++) {
       for(var y = 0; y < this.height; y++) {
         var el = this.elements[x][y];
-        if(el.mines && !el.flags) el.setAppearance("flag-"+el.mines);
+        if(el.mines && !el.flags) el.setAppearance("flag f"+el.mines);
       }
     }
     MineCounters.resetAll();
@@ -420,10 +420,10 @@ var HexGrid = {
   },
   
   
-  hexHalfHeight: 8,
-  hexFullHeight: 16,
-  hexSlopeWidth: 4,
-  hexTileWidth:  14,
+  hexHalfHeight: 10,
+  hexFullHeight: 20,
+  hexSlopeWidth: 5,
+  hexTileWidth:  17,
   
   getEventTarget: function(e) {
     var xcoord = e.pageX - this.container.boxObject.x;
