@@ -366,22 +366,29 @@ var HexGrid = {
 
   // give each element a list of those elements adjacent to it
   setAdjacents: function() {
-    var node, adj;
-    for(x = 0; x < this.width; x++) {
-      for(y = 0; y < this.height; y++) {
-        node = this.elements[x][y];
-        adj = this.moveUpLeft(node);
-        if(adj) node.adjacent.push(adj);
-        adj = this.moveDownLeft(node);
-        if(adj) node.adjacent.push(adj);
-        adj = this.moveUpRight(node);
-        if(adj) node.adjacent.push(adj);
-        adj = this.moveDownRight(node);
-        if(adj) node.adjacent.push(adj);
-        adj = this.moveUp(node);
-        if(adj) node.adjacent.push(adj);
-        adj = this.moveDown(node);
-        if(adj) node.adjacent.push(adj);
+    for(var x = 0, even = true; x < this.width; x++, even = !even) {
+      for(var y = 0; y < this.height; y++) {
+        var adjs = [], adj;
+        // up left
+        adj = this.getElement(x - 1, even ? y : y-1);
+        if(adj) adjs.push(adj);
+        // up
+        adj = this.getElement(x, y-1);
+        if(adj) adjs.push(adj);
+        // up right
+        adj = this.getElement(x+1, even ? y : y-1);
+        if(adj) adjs.push(adj);
+        // down right
+        adj = this.getElement(x+1, even ? y+1 : y);
+        if(adj) adjs.push(adj);
+        // down
+        adj = this.getElement(x, y+1);
+        if(adj) adjs.push(adj);
+        // down left
+        adj = this.getElement(x-1, even ? y+1 : y);
+        if(adj) adjs.push(adj);
+        // done
+        this.elements[x][y].adjacent = adjs;
       }
     }
   },
@@ -392,30 +399,6 @@ var HexGrid = {
     var ycoord = event.pageY - this.container.boxObject.y;
     var t = HexUtils.getHexAtCoords(xcoord,ycoord);
     return this.getElement(t.x,t.y);
-  },
-
-  // move one hex in the given direction. return the new hex element
-  moveUpLeft: function(el) {
-    var location = HexUtils.moveUpLeft(el.x,el.y);
-    return this.getElement(location.x,location.y);
-  },
-  moveDownLeft: function(el) {
-    var location = HexUtils.moveDownLeft(el.x,el.y);
-    return this.getElement(location.x,location.y);
-  },
-  moveUpRight: function(el) {
-    var location = HexUtils.moveUpRight(el.x,el.y);
-    return this.getElement(location.x,location.y);
-  },
-  moveDownRight: function(el) {
-    var location = HexUtils.moveDownRight(el.x,el.y);
-    return this.getElement(location.x,location.y);
-  },
-  moveDown: function(el) {
-    return this.getElement(el.x,el.y-1);
-  },
-  moveUp: function(el) {
-    return this.getElement(el.x,el.y+1);
   }
 }
 
@@ -505,12 +488,7 @@ var Timer = {
   },
 
   start: function() {
-    this.interval = setInterval("Timer.increment()", 1000);
-  },
-
-  increment: function() {
-    this.time++;
-    this.display();
+    this.interval = setInterval(incrementTimer, 1000);
   },
 
   stop: function() {
@@ -533,6 +511,10 @@ var Timer = {
     this.tensDisplay.className  = "counter-"+newTens;
     this.hundredsDisplay.className = "counter-"+newHundreds;
   }
+}
+function incrementTimer() {
+  Timer.time++;
+  Timer.display();
 }
 
 
@@ -621,7 +603,7 @@ const HexUtils = {
   },
 
   getHexAtCoords: function(xcoord, ycoord) {
-    var xtile = parseInt(xcoord / this.tileWidth);
+    var xtile = Math.floor(xcoord / this.tileWidth);
     var evenCol = (xtile % 2 == 0);
     // treat tile calculation the same for all cols
     if(evenCol) {
@@ -629,7 +611,7 @@ const HexUtils = {
       // abort if the gap at the top of the column has been clicked
       if(ycoord < 0) return {x: 0, y: -1};
     }
-    var ytile = parseInt(ycoord / this.fullHeight);
+    var ytile = Math.floor(ycoord / this.fullHeight);
     // get coords within rectangular tile
     var xintile = xcoord % this.tileWidth;
     var yintile = ycoord % this.fullHeight;
@@ -649,40 +631,21 @@ const HexUtils = {
       return {x: xtile, y: ytile};
     }
     if(yintile > this.halfHeight) {
+      // we're in the bottom left corner.  are we below the diagonal?
       yintile -= this.halfHeight;
-      // we're in the bottom left corner.  are we above the diagonal?
-      if(yintile * this.slopeWidth < xintile * this.halfHeight) {
-        return {x: xtile, y: ytile}; // above
-      } else {
-        return this.moveDownLeft(xtile,ytile); // below
+      if(yintile * this.slopeWidth > xintile * this.halfHeight) {
+        xtile--;
+        if(evenCol) ytile++;
+      }
+    } else {
+      // we're in top left corner of tile.  are we above the diagonal?
+      yintile = this.halfHeight - yintile;
+      if(yintile * this.slopeWidth > xintile * this.halfHeight) {
+        xtile--;
+        if(!evenCol) ytile--;
       }
     }
-    // in top left corner of tile.  use similar logic to above
-    xintile = this.slopeWidth - xintile;
-    if(yintile * this.slopeWidth > xintile * this.halfHeight) {
-      return {x: xtile, y: ytile}; // below
-    } else {
-      return this.moveUpLeft(xtile,ytile); // above
-    }
-  },
-
-  // these functions deal with the different change in coords required to move to an
-  // adjacent tile depending on whether the current tile is in an odd or even row
-  moveUpLeft: function(x, y) {
-    var y2 = (x % 2 == 0) ? y : y-1;
-    return {x: x-1, y: y2};
-  },
-  moveDownLeft: function(x, y) {
-    var y2 = (x % 2 == 0) ? y+1 : y;
-    return {x: x-1, y: y2};
-  },
-  moveUpRight: function(x, y) {
-    var y2 = (x % 2 == 0) ? y : y-1;
-    return {x: x+1, y: y2};
-  },
-  moveDownRight: function(x, y) {
-    var y2 = (x % 2 == 0) ? y+1 : y;
-    return {x: x+1, y: y2};
+    return {x: xtile, y: ytile};
   }
 }
 
