@@ -138,8 +138,34 @@ colours for buttons:
 .hex.button, .hex.flag { background: url(hex.png); }
 
 /* hex column styles for correct alignment */
-#hex-grid > vbox.evencolumn { margin-top: 10px; }
-#hex-grid > vbox { margin-left: -5px; }
+#hex-grid > .evencol { margin-top: 10px; }
+#hex-grid > .col { margin-left: -5px; }
 /* force the left-most column back into the #hex-grid box.
    cannot use padding on #hex-grid because it breaks <box>.boxObject.x etc */
 #hex-grid > :first-child { margin-left: 0; }
+
+
+
+
+/* triangle styles */
+.tri {
+  width: 24px;
+  height: 23px;
+  margin-top: -11px;
+}
+/* cancel negative margins for first tile in each col */
+#tri-grid > .col > :first-child { margin-top: 0; }
+  
+.tri.left.flag, .tri.left.button {
+  background: url(tri-left.png);
+}
+.tri.right.flag, .tri.right.button {
+  background: url(tri-right.png);
+}
+
+.tri.left {
+  text-align: right;
+}
+.tri.right {
+  text-align: left;
+}
