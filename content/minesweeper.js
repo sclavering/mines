@@ -1,6 +1,5 @@
 const HEXAGONAL = "hex";
 const SQUARE = "square";
-const TRIANGULAR = "tri";
 
 const kClassic = 0;
 const kCrazy = 1;
@@ -18,7 +17,6 @@ window.addEventListener("load",function() {
   MineCounters.init();
   SquareGrid.init();
   HexGrid.init();
-  TriGrid.init();
   Game.init();
 }, false);
 
@@ -37,9 +35,6 @@ function newSquareGame() {
 }
 function newHexagonalGame() {
   Game.switchMode(HEXAGONAL);
-}
-function newTriangularGame() {
-  Game.switchMode(TRIANGULAR);
 }
 
 function newClassicGame() {
@@ -164,7 +159,7 @@ var Game = {
     document.documentElement.setAttribute("shape",newMode);
     this.end();
     if(Grid) Grid.hide();
-    Grid = (newMode==SQUARE) ? SquareGrid : (newMode==HEXAGONAL ? HexGrid : TriGrid);
+    Grid = (newMode==HEXAGONAL) ? HexGrid : SquareGrid;
     Grid.show();
     this.newLikeCurrent();
     this.resizeWindow();
@@ -250,7 +245,7 @@ var GridBase = {
     this.height = height;
     this.elements = new Array(width);
     this.columns = new Array(width);
-    for(var x = 0, evencol = true; x < width; x++, evencol = !evencol) {
+    for(var x = 0; x < width; x++) {
       this.elements[x] = new Array(height);
       var col = this.columns[x] = document.createElement("vbox");
       for(var y = 0; y < height; y++) {
@@ -258,8 +253,7 @@ var GridBase = {
         this.elements[x][y] = el;
         col.appendChild(el);
       }
-      // needed for alignment in hexagonal games
-      col.className = evencol ? "col evencol" : "col";
+      if(x%2==0) col.className = "evencolumn"; // needed for alignment in hexagonal games
       this.container.appendChild(col);
     }
     this.setAdjacents();
@@ -267,9 +261,8 @@ var GridBase = {
 
   getElement: function(x, y) {
     // bounds checked because it's useful to the callers
-//    if(x>=0 && x<this.width && y>=0 && y<this.height)
-//      return this.elements[x][y];
-    if((x in this.elements) && (y in this.elements[x])) return this.elements[x][y];
+    if(x>=0 && x<this.width && y>=0 && y<this.height)
+      return this.elements[x][y];
     return null;
   },
 
@@ -284,10 +277,7 @@ var GridBase = {
     // an array of adjacent elements, created after the grid of elements is created
     el.adjacent = [];
 
-    // for triangular games: which way does the triangle face ?
-    var dir = (x % 2 == y % 2) ? "left" : "right";
-
-    var prefix = dir+" tile "+classPrefix;
+    var prefix = "tile "+classPrefix;
     el.setAppearance = function(state) {
       this.className = prefix+state;
     };
@@ -496,8 +486,8 @@ var SquareGrid = {
 
   setAdjacents: function() {
     var width = this.width, height = this.height;
-    for(var x = 0; x < width; x++) {
-      for(var y = 0; y < height; y++) {
+    for(x = 0; x < width; x++) {
+      for(y = 0; y < height; y++) {
         var adjacent = [];
         if(x!=0) {
           if(y!=height-1) adjacent.push(this.elements[x-1][y+1]);
@@ -520,116 +510,6 @@ var SquareGrid = {
     return e.target;
   }
 }
-
-
-
-var TriGrid = {
-  __proto__: GridBase,
-  
-  tileClassPrefix: "tri ",
-
-  init: function() {
-    this.container = document.getElementById("tri-grid");
-  },
-
-  setAdjacents: function() {
-    var width = this.width, height = this.height, el;
-    for(var x = 0, evencol = true; x < width; x++, evencol = !evencol) {
-      for(var y = 0, evenrow = true; y < height; y++, evenrow = !evenrow) {
-        var adj = [];
-        if(y != 0) adj.push(this.elements[x][y-1]);
-        if(y != height-1) adj.push(this.elements[x][y+1]);
-        
-        if(x!=width-1) {
-          adj.push(this.elements[x+1][y]);
-          // if the triangle points left
-          if(evencol == evenrow) {
-            el = this.getElement(x+1, y-2);
-            if(el) adj.push(el);
-            el = this.getElement(x+1, y+2);
-            if(el) adj.push(el);
-          }
-        }
-        if(x != 0) {
-          adj.push(this.elements[x-1][y]);
-          // if the triangle points right
-          if(evencol != evenrow) {
-            el = this.getElement(x-1, y-2);
-            if(el) adj.push(el);
-            el = this.getElement(x-1, y+2);
-            if(el) adj.push(el);
-          }
-        }
-        /*
-        var el = this.getElement(x, y-2);
-        if(el) adj.push(el);
-        el = this.getElement(x, y-1);
-        if(el) adj.push(el);
-        el = this.getElement(x, y+1);
-        if(el) adj.push(el);
-        el = this.getElement(x, y+2);
-        if(el) adj.push(el);
-        if(x!=0) {
-          el = this.getElement(x-1, y-1);
-          if(el) adj.push(el);
-          el = this.getElement(x-1, y);
-          if(el) adj.push(el);
-          el = this.getElement(x-1, y+1);
-          if(el) adj.push(el);
-          if(evencol != evenrow) {
-            el = this.getElement(x-1, y-2);
-            if(el) adj.push(el);
-            el = this.getElement(x-1, y+2);
-            if(el) adj.push(el);
-          }
-        }
-          el = this.getElement(x+1, y-1);
-          if(el) adj.push(el);
-          el = this.getElement(x+1, y);
-          if(el) adj.push(el);
-          el = this.getElement(x+1, y+1);
-          if(el) adj.push(el);
-          if(evencol == evenrow) {
-            el = this.getElement(x+1, y-2);
-            if(el) adj.push(el);
-            el = this.getElement(x+1, y+2);
-            if(el) adj.push(el);
-          }
-        }
-        */
-        this.elements[x][y].adjacent = adj;
-      }
-    }
-  },
-  
-  
-  triWidth: 24,
-  triHalfHeight: 12,
-  
-  getEventTarget: function(e) {
-    var xcoord = e.pageX - this.container.boxObject.x;
-    var ycoord = e.pageY - this.container.boxObject.y;
-
-    var xtile = Math.floor(xcoord / this.triWidth);
-    var evenCol = (xtile % 2 == 0);
-    var ytile = Math.floor(ycoord / this.triHalfHeight);
-    var evenRow  = (ytile % 2 == 0);
-    
-    var x = xcoord % this.triWidth;
-    var y = ycoord % this.triHalfHeight;
-    
-    // We're in a tile where the boundary btwn triangles slopes up and to the right.
-    // Here we effectively relfect the tile in the vertical axis, so from now on we
-    // can ignore the distinction
-    if(evenCol == evenRow) x = this.triWidth - x;
-    
-    // if we're above the slope of the tile we're still in the prv. triangle in the column
-    if(y * this.triWidth < x * this.triHalfHeight) ytile--;
-    
-    return this.getElement(xtile, ytile);
-  }
-}
-
 
 
 

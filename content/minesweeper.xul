@@ -30,7 +30,6 @@
 				<menuseparator/>
 				<menuitem type="radio" id="shape-square" name="shape" label="Squares" oncommand="newSquareGame();"/>
 				<menuitem type="radio" id="shape-hex"    name="shape" label="Hexagons" oncommand="newHexagonalGame();"/>
-				<menuitem type="radio" id="shape-tri"    name="shape" label="Triangles" oncommand="newTriangularGame();"/>
 				<menuseparator/>
 				<menuitem type="radio" id="crazy-0" name="crazyness" label="Classic" oncommand="newClassicGame();"/>
 				<menuitem type="radio" id="crazy-1" name="crazyness" label="Crazy" oncommand="newCrazyGame();"/>
@@ -55,7 +54,6 @@
   <box id="game-panel">
     <hbox id="square-grid"/>
     <hbox id="hex-grid"/>
-    <hbox id="tri-grid"/>
   </box>
 </vbox>
 
