@@ -269,15 +269,16 @@ var GridBase = {
      This starts with either "square-" or "hex-" (the |classPrefix|) depending on the
      type of tile, and ends with "button" "3" "flag" or something like that */
   createTile: function(x, y, classPrefix) {
-    var el = document.createElement("image");
+    var el = document.createElement("button");
     // needed during event handling
     el.x = x;
     el.y = y;
     // an array of adjacent elements, created after the grid of elements is created
     el.adjacent = [];
 
+    var prefix = "tile "+classPrefix;
     el.setAppearance = function(state) {
-      this.className = classPrefix+state;
+      this.className = prefix+state;
     };
 
     // also used when starting a new game of the same size
@@ -286,6 +287,7 @@ var GridBase = {
       this.revealed = false;
       this.mines = 0;
       this.number = 0;
+      this.removeAttribute("label");
       this.setAppearance("button");
     }
     el.reset();
@@ -312,9 +314,10 @@ var GridBase = {
       } else {
         this.revealed = true;
         Game.squaresRevealed++;
-        this.setAppearance(this.number);
+        this.setAppearance(this.number+" revealed");
+        if(this.number) this.setAttribute("label",this.number);
         // if its a blank square reveal round it
-        if(this.number==0) el.revealAround(el);
+        else el.revealAround(el);
         Game.checkWon();
       }
     }
@@ -355,7 +358,7 @@ var GridBase = {
         if(el.mines) {
           if(el.mines != el.flags) el.setAppearance("mine-"+el.mines);
         } else {
-          if(el.flags) el.setAppearance("cross-"+el.flags);
+          if(el.flags) el.setAppearance("cross");
         }
       }
     }
