@@ -20,7 +20,10 @@
   padding: 4px 6px;
   margin-bottom: 8px;
 }
-#mine-counter, #timer {
+#mine-counter-0,
+#mine-counter-1,
+#mine-counter-2,
+#timer {
   width: 6ex;
 }
 
@@ -39,10 +42,10 @@
 .hex-4 { -moz-image-region: rect(16px 108px 32px  90px); }
 .hex-5 { -moz-image-region: rect(16px 126px 32px 108px); }
 .hex-6 { -moz-image-region: rect(16px 144px 32px 126px); }
-.hex-flag  { -moz-image-region: rect(16px 162px 32px 144px); }
-.hex-cross { -moz-image-region: rect(16px 180px 32px 162px); }
-.hex-mine  { -moz-image-region: rect(16px 198px 32px 180px); }
-.hex-highlighted-mine { -moz-image-region: rect(16px 216px 32px 198px); }
+.hex-flag-1  { -moz-image-region: rect(16px 162px 32px 144px); }
+.hex-cross-1 { -moz-image-region: rect(16px 180px 32px 162px); }
+.hex-mine-1  { -moz-image-region: rect(16px 198px 32px 180px); }
+.hex-highlighted-mine-1 { -moz-image-region: rect(16px 216px 32px 198px); }
 
 /* square images */
 .square-button { -moz-image-region: rect(0px 16px 16px 0); }
@@ -55,10 +58,34 @@
 .square-6 { -moz-image-region: rect(0px 128px 16px 112px); }
 .square-7 { -moz-image-region: rect(0px 144px 16px 128px); }
 .square-8 { -moz-image-region: rect(0px 160px 16px 144px); }
-.square-flag  { -moz-image-region: rect(0px 176px 16px 160px); }
-.square-cross { -moz-image-region: rect(0px 192px 16px 176px); }
-.square-mine  { -moz-image-region: rect(0px 208px 16px 192px); }
-.square-highlighted-mine { -moz-image-region: rect(0px 224px 16px 208px); }
+.square-9 { -moz-image-region: rect(0px 176px 16px 160px); }
+.square-10 { -moz-image-region: rect(0px 192px 16px 176px); }
+.square-11 { -moz-image-region: rect(0px 208px 16px 192px); }
+.square-12 { -moz-image-region: rect(0px 224px 16px 208px); }
+.square-13 { -moz-image-region: rect(0px 240px 16px 224px); }
+.square-14 { -moz-image-region: rect(0px 256px 16px 240px); }
+.square-15 { -moz-image-region: rect(0px 272px 16px 256px); }
+.square-16 { -moz-image-region: rect(0px 288px 16px 272px); }
+.square-17 { -moz-image-region: rect(0px 304px 16px 288px); }
+.square-18 { -moz-image-region: rect(0px 320px 16px 304px); }
+.square-19 { -moz-image-region: rect(0px 336px 16px 320px); }
+.square-20 { -moz-image-region: rect(0px 352px 16px 336px); }
+.square-21 { -moz-image-region: rect(0px 368px 16px 352px); }
+.square-22 { -moz-image-region: rect(0px 384px 16px 368px); }
+.square-23 { -moz-image-region: rect(0px 400px 16px 384px); }
+.square-24 { -moz-image-region: rect(0px 160px 16px 400px); }
+.square-flag-1  { -moz-image-region: rect(32px 176px 48px 160px); }
+.square-cross-1 { -moz-image-region: rect(32px 192px 48px 176px); }
+.square-mine-1  { -moz-image-region: rect(32px 208px 48px 192px); }
+.square-highlighted-mine-1 { -moz-image-region: rect(32px 224px 48px 208px); }
+.square-flag-2  { -moz-image-region: rect(48px 176px 64px 160px); }
+.square-cross-2 { -moz-image-region: rect(48px 192px 64px 176px); }
+.square-mine-2  { -moz-image-region: rect(48px 208px 64px 192px); }
+.square-highlighted-mine-2 { -moz-image-region: rect(48px 224px 64px 208px); }
+.square-flag-3  { -moz-image-region: rect(64px 176px 80px 160px); }
+.square-cross-3 { -moz-image-region: rect(64px 192px 80px 176px); }
+.square-mine-3  { -moz-image-region: rect(64px 208px 80px 192px); }
+.square-highlighted-mine-3 { -moz-image-region: rect(64px 224px 80px 208px); }
 
 /* new game button */
 .new-game-button-normal { -moz-image-region: rect(32px  26px 58px     0); }

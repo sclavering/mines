@@ -6,10 +6,11 @@
 	id="minesweeper-window"
 	title="Minesweeper"
 	orient="vertical"
-	persist="screenX screenY gamewidth gameheight gamemines gamedifficulty gamemode"
+	persist="screenX screenY gamewidth gameheight gamemines difficulty shape crazy"
 
-  gamedifficulty="beginner"
-	gamemode="square"
+  difficulty="1"
+  crazy="0"
+	shape="square"
 	gamewidth="9"
 	gameheight="9"
 	gamemines="10"
@@ -23,12 +24,15 @@
 			<menupopup id="game-menu-popup">
 				<menuitem label="New" oncommand="newGame();"/>
 				<menuseparator/>
-				<menuitem type="radio" id="dif-beginner" name="difficulty" label="Beginner" oncommand="newBeginnerGame();"/>
-				<menuitem type="radio" id="dif-intermediate" name="difficulty" label="Intermediate" oncommand="newIntermediateGame();"/>
-				<menuitem type="radio" id="dif-expert" name="difficulty" label="Expert" oncommand="newExpertGame();"/>
+				<menuitem type="radio" id="dif-0" name="difficulty" label="Beginner" oncommand="newGame(0);"/>
+				<menuitem type="radio" id="dif-1" name="difficulty" label="Intermediate" oncommand="newGame(1);"/>
+				<menuitem type="radio" id="dif-2" name="difficulty" label="Expert" oncommand="newGame(2);"/>
 				<menuseparator/>
-				<menuitem type="radio" id="mi-square" name="tileshape" label="Squares" oncommand="newSquareGame();"/>
-				<menuitem type="radio" id="mi-hex"    name="tileshape" label="Hexagons" oncommand="newHexagonalGame();"/>
+				<menuitem type="radio" id="shape-square" name="shape" label="Squares" oncommand="newSquareGame();"/>
+				<menuitem type="radio" id="shape-hex"    name="shape" label="Hexagons" oncommand="newHexagonalGame();"/>
+				<menuseparator/>
+				<menuitem type="radio" id="crazy-0" name="crazyness" label="Classic" oncommand="newClassicGame();"/>
+				<menuitem type="radio" id="crazy-1" name="crazyness" label="Crazy" oncommand="newCrazyGame();"/>
 				<menuseparator/>
 				<menuitem label="Exit" oncommand="window.close();"/>
 			</menupopup>
@@ -38,9 +42,11 @@
 
 <vbox id="main-panel">
   <hbox id="top-panel">
-    <textbox id="mine-counter"/>
-    <spacer flex="1"/>
     <image id="new-game-button" onclick="newGame();"/>
+    <spacer flex="1"/>
+    <textbox id="mine-counter-0"/>
+    <textbox id="mine-counter-1"/>
+    <textbox id="mine-counter-2"/>
     <spacer flex="1"/>
     <textbox id="timer"/>
   </hbox>
