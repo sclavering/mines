@@ -18,8 +18,7 @@ colours for buttons:
   -moz-border-right-colors: #716f64 #aba798;
   -moz-border-bottom-colors: #716f64 #aba798;
 }
-#game-panel,
-#status-panel {
+#game-panel {
   border: 2px solid;
   -moz-border-top-colors: #aba798 #716f64;
   -moz-border-left-colors: #aba798 #716f64;
@@ -27,7 +26,6 @@ colours for buttons:
   -moz-border-bottom-colors: #fefefe #f0eee1;
 }
 #status-panel {
-  padding: 4px 6px;
   margin-right: 8px;
 }
 #mine-counter-0,
