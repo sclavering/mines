@@ -2,7 +2,6 @@ const HEXAGONAL = "hex";
 const SQUARE = "square";
 
 window.addEventListener("load",function() {
-  HexUtils.init(8,4,10);
   Timer.init();
   MineCounter.init();
   SquareGrid.init();
@@ -31,8 +30,7 @@ function newSquareGame() { Game.switchMode(SQUARE); }
 function newHexagonalGame() { Game.switchMode(HEXAGONAL); }
 
 var Game = {
-  // we init these for an easy game for the very first load of the app
-  // after that they will be read from prefs at startup
+  // these will overwritten by values read from attributes of the <window/>
   width: 9,
   height: 9,
   mines: 10,
@@ -61,12 +59,6 @@ var Game = {
     // restore last game mode (hexagonal or square)
     var mode = document.documentElement.getAttribute("gamemode");
     document.getElementById("mi-"+mode).setAttribute("checked","true");
-    // XXX for some reason if we start the app with a square game it will not respond
-    // to mouse clicks, but if the user switches to a hexagonal game and then back to
-    // square, the square game will work fine.  We work around this by starting a hex
-    // game, which the user will never actually see, because we switch immediately to
-    // a square game we want.
-    if(mode==SQUARE) this.switchMode(HEXAGONAL);
     this.switchMode(mode);
   },
 
@@ -151,7 +143,7 @@ var Game = {
 
 // === the grid, both square and hex versions =============
 
-var Grid; // set to one of HexGrid or SquareGrid
+var Grid = null; // set to one of HexGrid or SquareGrid
 
 var GridBase = {
   width: 0,
@@ -517,82 +509,72 @@ var Mouse = {
   left: false,
   right: false,
   middle: false,
-  x: null,
-  y: null,
 
   addHandlers: function() {
-    Grid.container.addEventListener("mousedown", this.mouseDownWrapper, false);
-    // on first click start timer, replace onmouseup function, and pass along the event to the new function
-    Grid.container.addEventListener("mouseup", this.firstMouseUp, false);
+    Grid.container.addEventListener("mousedown", mouseDown, false);
+    Grid.container.addEventListener("mouseup", initialMouseUp, false);
   },
-
   removeHandlers: function() {
-    Grid.container.removeEventListener("mousedown", this.mouseDownWrapper, false);
-    Grid.container.removeEventListener("mouseup", this.mouseUpWrapper, false);
-  },
-
-  firstMouseUp: function(event) {
-    var el = Grid.getEventTarget(event);
-    // don't do anything if the gap at the top of a column has been clicked
-    if(!el) return;
-
-    Grid.container.removeEventListener("mouseup", Mouse.firstMouseUp, false);
-    // start a new game if a mine has been clicked
-    if(el.isMine) {
-      Game.newLikeCurrent();
-      // pass the event through to the new game
-      Mouse.firstMouseUp(event);
-    } else {
-      Timer.start();
-      Grid.container.addEventListener("mouseup", Mouse.mouseUpWrapper, false);
-      Mouse.mouseUp(event);
-    }
-  },
-
-  mouseDownWrapper: function(e) { Mouse.mouseDown(e); },
-  mouseUpWrapper: function(e) { Mouse.mouseUp(e); },
-
-  mouseDown: function(event) {
-    var el = Grid.getEventTarget(event);
-    if(!el) return;
-    this.x = el.x;
-    this.y = el.y;
-    if(event.button==0 && !event.shiftKey && !event.ctrlKey)         this.left = true;
-    else if(event.button==1 || (event.button===0 && event.shiftKey)) this.middle = true;
-    else if(event.button==2 || (event.button===0 && event.ctrlKey))  this.right = true;
-  },
-
-  mouseUp: function(event) {
-    var el = Grid.getEventTarget(event);
-    if(!el) return;
-    // check mouse still on same square/hex as for mousedown
-    if(el.x==this.x && el.y==this.y) {
-      if((this.left && this.right) || this.middle) el.tryRevealAround();
-      else if(this.left)  el.reveal();
-      else if(this.right) el.toggleFlag();
-    }
-    this.left = false;
-    this.middle = false;
-    this.right = false;
+    Grid.container.removeEventListener("mousedown", mouseDown, false);
+    Grid.container.removeEventListener("mouseup", mouseUp, false);
   }
+}
+
+// starts a new game if a mine has been hit, starts the timer and passes the event on otherwise
+function initialMouseUp(e) {
+  var el = Grid.getEventTarget(e);
+  if(!el) return;
+
+  Grid.container.removeEventListener("mouseup", initialMouseUp, false);
+  if(el.isMine) {
+    Game.newLikeCurrent();
+    initialMouseUp(e);
+  } else {
+    Timer.start();
+    Grid.container.addEventListener("mouseup", mouseUp, false);
+    mouseUp(e);
+  }
+}
+
+function mouseDown(e) { 
+  var el = Grid.getEventTarget(e);
+  if(!el) return;
+  if(e.button==0) {
+    if(e.shiftKey) Mouse.middle = true;
+    else if(e.ctrlKey) Mouse.right = true;
+    else Mouse.left = true;
+  } else if(e.button==2) {
+    Mouse.right = true;
+  } else {
+    Mouse.middle = true;
+  }
+}
+
+function mouseUp(e) {
+  var el = Grid.getEventTarget(e);
+  if(!el) return;
+  if(Mouse.left) {
+    if(Mouse.right) el.tryRevealAround();
+    else el.reveal();
+  } else if(Mouse.right) {
+    el.toggleFlag();
+  } else {
+    el.tryRevealAround();
+  }
+  Mouse.left = false;
+  Mouse.middle = false;
+  Mouse.right = false;
 }
 
 
 
+
 // === hex stuff ==========================================
-
 const HexUtils = {
-  halfHeight: 0,
-  slopeWidth: 0,
-  tileWidth:  0,
-  fullHeight: 0,
-
-  init: function(hh, sw, bw) {
-    this.halfHeight = hh;
-    this.fullHeight = 2 * hh;
-    this.slopeWidth = sw;
-    this.tileWidth = sw + bw; // width of the tiles in the grid we impose when calculating hex at given coords
-  },
+  halfHeight: 8,
+  fullHeight: 16,
+  slopeWidth: 4,
+  tileWidth:  14,
 
   getHexAtCoords: function(xcoord, ycoord) {
     var xtile = Math.floor(xcoord / this.tileWidth);

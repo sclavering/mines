@@ -54,10 +54,8 @@
   </hbox>
 
   <box id="game-panel">
-    <stack>
     <hbox id="square-grid"/>
     <hbox id="hex-grid"/>
-    </stack>
   </box>
 </vbox>
 
