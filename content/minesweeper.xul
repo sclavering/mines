@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="minesweeper.css" type="text/css"?>
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	windowtype="minesweeper-hexsweeper"
+	id="minesweeper-window"
+	title="Minesweeper"
+	orient="vertical"
+	persist="screenX screenY gamewidth gameheight gamemines gamedifficulty gamemode"
+
+  gamedifficulty="beginner"
+	gamemode="square"
+	gamewidth="9"
+	gameheight="9"
+	gamemines="10"
+	>
+
+	<script type="application/x-javascript" src="minesweeper.js"/>
+
+	<menubar id="main-menubar">
+		<menu id="game-menu" label="Game">
+			<menupopup id="game-menu-popup">
+				<menuitem label="New" oncommand="newGame();"/>
+				<menuseparator/>
+				<menuitem type="radio" id="dif-beginner" name="difficulty" label="Beginner" oncommand="newBeginnerGame();"/>
+				<menuitem type="radio" id="dif-intermediate" name="difficulty" label="Intermediate" oncommand="newIntermediateGame();"/>
+				<menuitem type="radio" id="dif-expert" name="difficulty" label="Expert" oncommand="newExpertGame();"/>
+				<menuseparator/>
+				<menuitem type="radio" id="mi-square" name="tileshape" label="Squares" oncommand="newSquareGame();"/>
+				<menuitem type="radio" id="mi-hex"    name="tileshape" label="Hexagons" oncommand="newHexagonalGame();"/>
+				<menuseparator/>
+				<menuitem label="Exit" oncommand="window.close();"/>
+			</menupopup>
+		</menu>
+	</menubar>
+
+	<grid>
+		<columns>
+			<column/>
+			<column/>
+			<column/>
+		</columns>
+		<rows>
+			<row>
+				<image id="top-left-corner"/>
+				<image class="image-border-horizontal"/>
+				<image id="top-right-corner"/>
+			</row>
+			<row>
+				<image class="image-border-vertical"/>
+				<hbox id="top-panel">
+					<hbox>
+						<image id="mine-counter-hundreds"/>
+						<image id="mine-counter-tens"/>
+						<image id="mine-counter-units"/>
+					</hbox>
+					<spacer flex="1"/>
+					<image id="new-game-button" onclick="newGame();"/>
+					<spacer flex="1"/>
+					<hbox>
+						<image id="timer-hundreds"/>
+						<image id="timer-tens"/>
+						<image id="timer-units"/>
+					</hbox>
+				</hbox>
+				<image class="image-border-vertical"/>
+			</row>
+			<row>
+				<image id="middle-left-junction"/>
+				<image class="image-border-horizontal"/>
+				<image id="middle-right-junction"/>
+			</row>
+			<row>
+				<image class="image-border-vertical"/>
+				<box id="game-panel">
+				  <stack>
+				  <hbox id="square-grid"/>
+				  <hbox id="hex-grid"/>
+				  </stack>
+				</box>
+				<image class="image-border-vertical"/>
+			</row>
+			<row>
+				<image id="bottom-left-corner"/>
+				<image class="image-border-horizontal"/>
+				<image id="bottom-right-corner"/>
+			</row>
+		</rows>
+	</grid>
+
+</window>

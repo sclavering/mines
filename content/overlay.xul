@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+
+<overlay id="MinesweeperOverlay"
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+<!-- Firebird -->
+<menupopup id="menu_ToolsPopup">
+  <menuitem id="minesweeper" label="Play Minesweeper" insertbefore="prefSep"
+      oncommand="toOpenWindowByType('minesweeper-hexsweeper','chrome://minesweeper/content/');"/>
+</menupopup>
+
+</overlay>
