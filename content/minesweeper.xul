@@ -2,18 +2,10 @@
 <?xml-stylesheet href="minesweeper.css" type="text/css"?>
 
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	windowtype="minesweeper-hexsweeper"
-	id="minesweeper-window"
+	windowtype="minesweeper"
+	id="minesweeper-window2"
 	title="Minesweeper"
-	orient="vertical"
-	persist="screenX screenY gamewidth gameheight gamemines difficulty shape crazy"
-
-  difficulty="1"
-  crazy="0"
-	shape="square"
-	gamewidth="9"
-	gameheight="9"
-	gamemines="10"
+	persist="screenX screenY"
 	>
 
 <script type="application/x-javascript" src="minesweeper.js"/>
@@ -28,11 +20,18 @@
 				<menuitem type="radio" id="dif-1" name="difficulty" label="Intermediate" oncommand="newGame(1);"/>
 				<menuitem type="radio" id="dif-2" name="difficulty" label="Expert" oncommand="newGame(2);"/>
 				<menuseparator/>
-				<menuitem type="radio" id="shape-square" name="shape" label="Squares" oncommand="newSquareGame();"/>
-				<menuitem type="radio" id="shape-hex"    name="shape" label="Hexagons" oncommand="newHexagonalGame();"/>
+				<menuitem type="radio" id="shape-square" name="shape" label="Square tiles" oncommand="newSquareGame();"/>
+				<menuitem type="radio" id="shape-hex"    name="shape" label="Hexagonal tiles" oncommand="newHexagonalGame();"/>
 				<menuseparator/>
-				<menuitem type="radio" id="crazy-0" name="crazyness" label="Classic" oncommand="newClassicGame();"/>
-				<menuitem type="radio" id="crazy-1" name="crazyness" label="Crazy" oncommand="newCrazyGame();"/>
+				<menu label="Mines per tile" oncommand="setMinesPerTile(event.target.getAttribute('value'));">
+				  <menupopup id="minespertile-popup">
+				    <menuitem id="minespertile-1" type="radio" value="1" label="One or fewer"/>
+				    <menuitem id="minespertile-2" type="radio" value="2" label="Two or fewer"/>
+				    <menuitem id="minespertile-3" type="radio" value="3" label="Three or fewer"/>
+				    <menuitem id="minespertile-4" type="radio" value="4" label="Four or fewer"/>
+				    <menuitem id="minespertile-5" type="radio" value="5" label="Five or fewer"/>
+				  </menupopup>
+				</menu>
 				<menuseparator/>
 				<menuitem label="Exit" oncommand="window.close();"/>
 			</menupopup>
@@ -40,25 +39,38 @@
 	</menubar>
 </toolbox>
 
-<vbox id="main-panel">
-  <hbox id="top-panel" align="center">
+<hbox id="main-panel">
+  <vbox id="status-panel" align="start">
     <image id="new-game-button" onclick="newGame();"/>
-    <spacer flex="1"/>
-    <!-- putting the image/label pairs in hboxes would be sane, but breaks -moz-image-region :s -->
-    <image class="f1 counter-icon"/>
-    <label id="mine-counter-0"/>
-    <image class="f2 counter-icon"/>
-    <label id="mine-counter-1"/>
-    <image class="f3 counter-icon"/>
-    <label id="mine-counter-2"/>
-    <spacer flex="1"/>
+
     <label id="timer"/>
-  </hbox>
+
+    <hbox align="center">
+      <image class="f1 counter-icon"/>
+      <label id="mine-counter-0"/>
+    </hbox>
+    <hbox align="center">
+      <image class="f2 counter-icon"/>
+      <label id="mine-counter-1"/>
+    </hbox>
+    <hbox align="center">
+      <image class="f3 counter-icon"/>
+      <label id="mine-counter-2"/>
+    </hbox>
+    <hbox align="center">
+      <image class="f4 counter-icon"/>
+      <label id="mine-counter-3"/>
+    </hbox>
+    <hbox align="center">
+      <image class="f5 counter-icon"/>
+      <label id="mine-counter-4"/>
+    </hbox>
+  </vbox>
 
   <box id="game-panel">
     <hbox id="square-grid"/>
     <hbox id="hex-grid"/>
   </box>
-</vbox>
+</hbox>
 
 </window>

@@ -1,6 +1,6 @@
 @import url(chrome://global/skin/);
 
-/* 
+/*
 colours for buttons:
  face:            #ebe8d8
  outer-highlight: #fefefe
@@ -19,16 +19,16 @@ colours for buttons:
   -moz-border-bottom-colors: #716f64 #aba798;
 }
 #game-panel,
-#top-panel {
+#status-panel {
   border: 2px solid;
   -moz-border-top-colors: #aba798 #716f64;
   -moz-border-left-colors: #aba798 #716f64;
   -moz-border-right-colors: #fefefe #f0eee1;
   -moz-border-bottom-colors: #fefefe #f0eee1;
 }
-#top-panel {
+#status-panel {
   padding: 4px 6px;
-  margin-bottom: 8px;
+  margin-right: 8px;
 }
 #mine-counter-0,
 #mine-counter-1,
@@ -86,16 +86,22 @@ colours for buttons:
 .tile { list-style-image: url(images.png); }
 .button, .revealed { list-style-image: none; }
 
-.cross { -moz-image-region: rect(0 56px 14px 42px); }
+.cross { -moz-image-region: rect(42px 70px 56px 56px); }
 .f1 { -moz-image-region: rect(0 14px 14px 0); }
 .f2 { -moz-image-region: rect(0 28px 14px 14px); }
 .f3 { -moz-image-region: rect(0 42px 14px 28px); }
+.f4 { -moz-image-region: rect(0 56px 14px 42px); }
+.f5 { -moz-image-region: rect(0 70px 14px 56px); }
 .m1 { -moz-image-region: rect(14px 14px 28px 0); }
 .m2 { -moz-image-region: rect(14px 28px 28px 14px); }
 .m3 { -moz-image-region: rect(14px 42px 28px 28px); }
+.m4 { -moz-image-region: rect(14px 56px 28px 42px); }
+.m5 { -moz-image-region: rect(14px 70px 28px 56px); }
 .e1 { -moz-image-region: rect(28px 14px 42px 0); }
 .e2 { -moz-image-region: rect(28px 28px 42px 14px); }
 .e3 { -moz-image-region: rect(28px 42px 42px 28px); }
+.e4 { -moz-image-region: rect(28px 56px 42px 42px); }
+.e5 { -moz-image-region: rect(28px 70px 42px 56px); }
 
 /* revealed tiles */
 .revealed { font-weight: bold; }
@@ -113,7 +119,7 @@ colours for buttons:
 .square {
   width: 18px;
   height: 18px;
-} 
+}
 .square.mine, square.cross, .square.explosion { padding: 2px; }
 
 /* button styling is applied to the .button-box because it does not work#

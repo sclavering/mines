@@ -6,49 +6,95 @@ const kCrazy = 1;
 
 const kWidths = [9,16,30];
 const kHeights = [9,16,16];
-const kMines = [[[10],[40],[99]], [[5,3,2],[22,12,8],[55,30,15]]];
 
-var gCrazyMode;
+const kMines = {
+  1: [[10],[40],[99]],
+  2: [[6,4],[30,10],[66,33]],
+  3: [[5,3,2],[22,12,8],[55,30,15]],
+  4: [[5,2,2,1],[18,8,8,6],[50,20,20,10]],
+  5: [[4,2,2,1,1],[14,10,8,5,3],[40,20,15,10,5]]
+};
+
+
 var gCurrentDifficulty;
+var gTileShape;
+var gMinesPerTile;
 
+var gPrefs; // an nsIPrefBranch
+var gSmileyFace; // an <image/> being used as a button
 
-window.addEventListener("load",function() {
+window.onload = function() {
+  gPrefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService);
+  gPrefs = gPrefs.getBranch("games.minesweeper.");
+
+  // restore difficulty level
+  gCurrentDifficulty = 1;
+  try { gCurrentDifficulty = gPrefs.getIntPref("difficulty-level"); } catch(e) { alert("couldnae load difficulty level!");}
+  document.getElementById("dif-"+gCurrentDifficulty).setAttribute("checked","true");
+
+  // restore tile shape
+  gTileShape = SQUARE;
+  try { gTileShape = gPrefs.getCharPref("tile-shape"); } catch(e) {}
+  document.getElementById("shape-"+gTileShape).setAttribute("checked","true");
+
+  // restore mines-per-tile
+  gMinesPerTile = 1;
+  try { gMinesPerTile = gPrefs.getIntPref("mines-per-tile"); } catch(e) {}
+  document.getElementById("minespertile-"+gMinesPerTile).setAttribute("checked","true");
+
+  gSmileyFace = document.getElementById("new-game-button");
+  gSmileyFace.setFace = function(face) {
+    this.className = "new-game-button-"+face;
+  };
+
   Timer.init();
   MineCounters.init();
   SquareGrid.init();
   HexGrid.init();
-  Game.init();
-}, false);
+
+  setTileShape(gTileShape);
+};
 
 
-function newGame(type) {
-  if(type || type===0) {
-    document.documentElement.setAttribute("difficulty",type);
-    Game.newGame(kWidths[type], kHeights[type], kMines[gCrazyMode][type]);
-  } else {    
+function newGame(difficulty) {
+  if(difficulty || difficulty===0) {
+    gCurrentDifficulty = difficulty;
+    gPrefs.setIntPref("difficulty-level", difficulty);
+    Game.newGame(kWidths[difficulty], kHeights[difficulty], kMines[gMinesPerTile][difficulty]);
+    sizeToContent();
+  } else {
     Game.newLikeCurrent();
   }
 }
 
 function newSquareGame() {
-  Game.switchMode(SQUARE);
-}
-function newHexagonalGame() {
-  Game.switchMode(HEXAGONAL);
+  setTileShape(SQUARE);
 }
 
-function newClassicGame() {
-  gCrazyMode = kClassic;
-  newGame(gCurrentDifficulty);
-  document.documentElement.setAttribute("crazy",kClassic);
+function newHexagonalGame() {
+  setTileShape(HEXAGONAL);
 }
-function newCrazyGame() {
-  gCrazyMode = kCrazy;
+
+function setMinesPerTile(num) {
+  gMinesPerTile = num;
+  gPrefs.setIntPref("mines-per-tile", num);
   newGame(gCurrentDifficulty);
-  document.documentElement.setAttribute("crazy",kCrazy);
 }
-  
-  
+
+function setTileShape(shape) {
+  gTileShape = shape;
+  gPrefs.setCharPref("tile-shape", shape);
+
+  Game.end();
+
+  if(Grid) Grid.hide();
+  Grid = (shape==HEXAGONAL) ? HexGrid : SquareGrid;
+  Grid.show();
+
+  newGame(gCurrentDifficulty);
+}
+
+
 
 
 var Game = {
@@ -57,7 +103,7 @@ var Game = {
   height: 9,
   mines: 10,
   nonMines: 0,
-  
+
   // the maximum number of flags on a single square.  >1 in advanced games
   maxFlags: 1,
 
@@ -66,56 +112,17 @@ var Game = {
 
   inProgress: false,
 
-  preferences: null,
-
-  // UI bits
-  smileyButton: null,
-
-  init: function() {
-    this.smileyButton = document.getElementById("new-game-button");
-    // get last difficulty level used
-    this.width = parseInt(document.documentElement.getAttribute("gamewidth"));
-    this.height = parseInt(document.documentElement.getAttribute("gameheight"));
-    this.mines = document.documentElement.getAttribute("gamemines").split(/\s+/);
-    this.nonMines = this.width * this.height;
-    for(var i = 0; i < this.mines.length; i++) {
-      this.mines[i] = parseInt(this.mines[i]);
-      this.nonMines -= this.mines[i];
-    }
-    this.maxFlags = this.mines.length;
-    // select the right menuitem on the game menu
-    var difficulty = document.documentElement.getAttribute("difficulty");
-    document.getElementById("dif-"+difficulty).setAttribute("checked","true");
-    gCurrentDifficulty = parseInt(difficulty);
-    // select Classic/Crazy menuitem
-    var crazy = document.documentElement.getAttribute("crazy");
-    document.getElementById("crazy-"+crazy).setAttribute("checked","true");
-    gCrazyMode = parseInt(crazy);
-    // restore last game mode (hexagonal or square)
-    var mode = document.documentElement.getAttribute("shape");
-    document.getElementById("shape-"+mode).setAttribute("checked","true");
-    this.switchMode(mode);
-  },
-
-  newLikeCurrent: function() {
-    this.newGame2();
-  },
-
   newGame: function(width, height, mines) {
-    document.documentElement.setAttribute("gamewidth",width);
-    document.documentElement.setAttribute("gameheight",height);
-    document.documentElement.setAttribute("gamemines",mines.join(' '));
     this.width = width;
     this.height = height;
     this.mines = mines;
     this.nonMines = this.width * this.height;
-    for(var i = 0; i < mines.length; i++) this.nonMines -= this.mines[i];
+    for(var i in mines) this.nonMines -= this.mines[i];
     this.maxFlags = mines.length;
-    this.newGame2();
-    this.resizeWindow();
+    this.newLikeCurrent();
   },
 
-  newGame2: function() {
+  newLikeCurrent: function() {
     this.end();
     this.inProgress = true;
     Grid.newGrid(this.width, this.height, this.mines);
@@ -124,22 +131,21 @@ var Game = {
     MineCounters.setAll(this.mines);
     // misc display stuff
     Timer.reset();
-    this.setSmileyButton("normal");
+    gSmileyFace.setFace("normal");
     Mouse.addHandlers();
   },
 
   checkWon: function() {
-    if(this.squaresRevealed == this.nonMines) {
-      this.end();
-      Grid.updateForGameWon();
-      this.setSmileyButton("won");
-    }
+    if(this.squaresRevealed != this.nonMines) return;
+    this.end();
+    Grid.updateForGameWon();
+    gSmileyFace.setFace("won");
   },
 
   lose: function() {
     Grid.updateForGameLost();
     this.end();
-    this.setSmileyButton("lost");
+    gSmileyFace.setFace("lost");
   },
 
   end: function() {
@@ -147,31 +153,6 @@ var Game = {
     this.inProgress = false;
     Timer.stop();
     Mouse.removeHandlers();
-  },
-
-  setSmileyButton: function(state) {
-    this.smileyButton.className = "new-game-button-"+state;
-  },
-  
-  // switch between square and hexagonal modes.
-  // doesn't matter if it ends up switching hex->hex or square->square
-  switchMode: function(newMode) {
-    document.documentElement.setAttribute("shape",newMode);
-    this.end();
-    if(Grid) Grid.hide();
-    Grid = (newMode==HEXAGONAL) ? HexGrid : SquareGrid;
-    Grid.show();
-    this.newLikeCurrent();
-    this.resizeWindow();
-  },
-
-  resizeWindow: function() {
-    // sizeToContent() *will not reduce* the size of the window for some reason,
-    // so we zero it ourselves first, which gives the correct overall result.
-    // (bug observed in Mozilla Firebird 20030616 build. nothing else has been tested)
-    window.innerWidth = 0;
-    window.innerHeight = 0;
-    window.sizeToContent();
   }
 }
 
@@ -381,7 +362,7 @@ var GridBase = {
 
 var HexGrid = {
   __proto__: GridBase,
-  
+
   // prefixed onto the className of every <image> being used as a tile in the grid.
   // see the createTile method, and the setAppearance method it gives to tiles
   tileClassPrefix: "hex ",
@@ -418,13 +399,13 @@ var HexGrid = {
       }
     }
   },
-  
-  
+
+
   hexHalfHeight: 10,
   hexFullHeight: 20,
   hexSlopeWidth: 5,
   hexTileWidth:  17,
-  
+
   getEventTarget: function(e) {
     var xcoord = e.pageX - this.container.boxObject.x;
     var ycoord = e.pageY - this.container.boxObject.y;
@@ -477,7 +458,7 @@ var HexGrid = {
 
 var SquareGrid = {
   __proto__: GridBase,
-  
+
   tileClassPrefix: "square ",
 
   init: function() {
@@ -486,8 +467,8 @@ var SquareGrid = {
 
   setAdjacents: function() {
     var width = this.width, height = this.height;
-    for(x = 0; x < width; x++) {
-      for(y = 0; y < height; y++) {
+    for(var x = 0; x < width; x++) {
+      for(var y = 0; y < height; y++) {
         var adjacent = [];
         if(x!=0) {
           if(y!=height-1) adjacent.push(this.elements[x-1][y+1]);
@@ -505,7 +486,7 @@ var SquareGrid = {
       }
     }
   },
-  
+
   getEventTarget: function(e) {
     return e.target;
   }
@@ -527,7 +508,7 @@ var Timer = {
   start: function() {
     this.interval = setInterval(this.increment, 1000);
   },
-  
+
   increment: function() {
     Timer.display.value = (++Timer.time);
   },
@@ -549,19 +530,19 @@ var Timer = {
 
 var MineCounters = {
   values: [],
-  icons: [],
+  containers: [],
   displays: [],
-  
+
   init: function() {
     var i = 0;
     var elt = document.getElementById("mine-counter-0");
     while(elt) {
       this.displays.push(elt);
-      this.icons.push(elt.previousSibling);  // the <image/>
+      this.containers.push(elt.parentNode);
       elt = document.getElementById("mine-counter-"+(++i));
     }
   },
-  
+
   increase: function(counter) {
     var c = counter - 1; // arrays are 0 based, but we have no 0 counter
     this.values[c]++;
@@ -572,7 +553,7 @@ var MineCounters = {
     this.values[c]--;
     this.displays[c].value = this.values[c];
   },
-  
+
   resetAll: function() {
     for(var i = 0; i < this.values.length; i++) this.displays[i].value = 0;
   },
@@ -582,14 +563,14 @@ var MineCounters = {
     for(var i = 0; i < newvals.length; i++) {
       this.values[i] = newvals[i];
       this.displays[i].value = newvals[i];
-      this.displays[i].collapsed = this.icons[i].collapsed = false;
+      this.containers[i].collapsed = false;
     }
     for(; i < this.displays.length; i++) {
-      this.displays[i].collapsed = this.icons[i].collapsed = true;
+      this.containers[i].collapsed = true;
     }
   }
 }
-  
+
 
 
 
@@ -626,7 +607,7 @@ function initialMouseUp(e) {
   }
 }
 
-function mouseDown(e) { 
+function mouseDown(e) {
   if(e.button==0) {
     if(e.shiftKey) Mouse.middle = true;
     else if(e.ctrlKey) Mouse.right = true;
@@ -653,4 +634,3 @@ function mouseUp(e) {
   Mouse.middle = false;
   Mouse.right = false;
 }
-

@@ -3,16 +3,16 @@
 <overlay id="MinesweeperOverlay"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-<!-- Firebird -->
+<!-- Firefox -->
 <menupopup id="menu_ToolsPopup">
   <menuitem id="minesweeper" label="Minesweeper" insertbefore="prefSep"
-      oncommand="toOpenWindowByType('minesweeper-hexsweeper','chrome://minesweeper/content/');"/>
+      oncommand="toOpenWindowByType('minesweeper','chrome://minesweeper/content/');"/>
 </menupopup>
 
 <!-- Seamonkey -->
 <menupopup id="windowPopup">
   <menuitem id="minesweeper" label="Minesweeper" insertbefore="sep-window-list"
-      oncommand="toOpenWindowByType('minesweeper-hexsweeper','chrome://minesweeper/content/');"/>
+      oncommand="toOpenWindowByType('minesweeper','chrome://minesweeper/content/');"/>
 </menupopup>
 
 </overlay>
