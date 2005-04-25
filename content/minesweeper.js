@@ -25,17 +25,20 @@ var gMinesPerTile;
 var gNoMinesAtEdges = false;
 
 var gPrefs; // an nsIPrefBranch
-var gSmileyFace; // an <image/> being used as a button
-
 
 const ui = {
   pauseCmd: "cmd.pause",
-  pauseMsg: "msg.pause"
+  pauseMsg: "msg.pause",
+  smileyFace: "new-game-button"
 };
 
 
 window.onload = function() {
   for(var i in ui) ui[i] = document.getElementById(ui[i]);
+
+  ui.smileyFace.setFace = function(face) {
+    this.className = "new-game-button-"+face;
+  };
 
   gPrefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService);
   gPrefs = gPrefs.getBranch("games.minesweeper.");
@@ -54,11 +57,6 @@ window.onload = function() {
   gMinesPerTile = 1;
   try { gMinesPerTile = gPrefs.getIntPref("mines-per-tile"); } catch(e) {}
   document.getElementById("minespertile-"+gMinesPerTile).setAttribute("checked","true");
-
-  gSmileyFace = document.getElementById("new-game-button");
-  gSmileyFace.setFace = function(face) {
-    this.className = "new-game-button-"+face;
-  };
 
   Timer.init();
   MineCounters.init();
@@ -128,6 +126,9 @@ function togglePause() {
 }
 
 
+// xxx bits of this need merging with the state parts of the Grid to create an
+// object which really represents a single game.  Grid needs dividing along
+// model/view lines.
 
 var Game = {
   // these will overwritten by values read from attributes of the <window/>
@@ -159,14 +160,19 @@ var Game = {
     this.end();
     this.inProgress = true;
     this._newLikeCurrent();
-    // counters
+
     this.squaresRevealed = 0;
     MineCounters.setAll(this.mines);
-    // misc display stuff
     Timer.reset();
-    gSmileyFace.setFace("normal");
-    addMouseHandlers(true);
     ui.pauseMsg.hidden = true;
+    ui.smileyFace.setFace("normal");
+    if(gNoMinesAtEdges) {
+      Grid.revealEdges();
+      addMouseHandlers(false);
+      Timer.start();
+    } else {
+      addMouseHandlers(true);
+    }
   },
 
   // needed by mouseClick to silently start a new game if the first square clicked is a mine
@@ -178,13 +184,13 @@ var Game = {
     if(this.squaresRevealed != this.nonMines) return;
     this.end();
     Grid.updateForGameWon();
-    gSmileyFace.setFace("won");
+    ui.smileyFace.setFace("won");
   },
 
   lose: function() {
     Grid.updateForGameLost();
     this.end();
-    gSmileyFace.setFace("lost");
+    ui.smileyFace.setFace("lost");
   },
 
   end: function() {
@@ -286,6 +292,23 @@ var GridBase = {
     if(x>=0 && x<this.width && y>=0 && y<this.height)
       return this.elements[x][y];
     return null;
+  },
+
+  revealEdges: function() {
+    const es = this.elements, w = this.width, h = this.height;
+    const maxx = w - 1, maxy = h - 1;
+    for(var y = 0; y != h; ++y) {
+      var el = es[0][y];
+      if(!el.revealed) el.reveal();
+      el = es[maxx][y];
+      if(!el.revealed) el.reveal();
+    }
+    for(var x = 1; x != maxx; ++x) {
+      el = es[x][0];
+      if(!el.revealed) el.reveal();
+      el = es[x][maxy];
+      if(!el.revealed) el.reveal();
+    }
   },
 
   updateForGameLost: function() {
@@ -633,24 +656,25 @@ var MineCounters = {
 
 
 
-
-function addMouseHandlers(forGameStart) {
+// The first click should be safe (never hit a mine) and start
+// the timer unless playing in no-mines-at-edges mode
+function addMouseHandlers(safeFirstClick) {
   Grid.container.onclick = mouseClick;
-  if(forGameStart) gIsFirstMouseClick = true;
+  if(safeFirstClick) gIsSafeMouseClick = true;
 }
 
 function removeMouseHandlers() {
   Grid.container.onclick = null;
 }
 
-var gIsFirstMouseClick = false;
+var gIsSafeMouseClick = false;
 
 function mouseClick(e) {
   const el = Grid.getEventTarget(e);
 
   // make the first click always safe (if it's a left-click)
-  if(gIsFirstMouseClick) {
-    gIsFirstMouseClick = false;
+  if(gIsSafeMouseClick) {
+    gIsSafeMouseClick = false;
     if(e.button==0) {
       while(el.mines) Game._newLikeCurrent();
       Timer.start();
