@@ -10,24 +10,31 @@ colours for buttons:
 */
 
 #main-panel {
-  padding: 4px;
   background: #ebe8d8;
+  padding-left: 4px;
 }
+
 #game-panel {
-  border: 2px solid;
-  -moz-border-top-colors: #aba798 #716f64;
-  -moz-border-left-colors: #aba798 #716f64;
-  -moz-border-right-colors: #fefefe #f0eee1;
-  -moz-border-bottom-colors: #fefefe #f0eee1;
+  padding: 2px;
+  border-left: 2px solid;
+  -moz-border-left-colors: #f0eee1 #aba798;
 }
-#status-panel {
-  margin-right: 8px;
+
+#msg-pause {
+  background: #ebe8d8;
+  opacity: 0.85;
+  text-align: center;
+  font-size: 25px;
+  color: black;
+  margin: 0;
+  padding: 25px 0 0 0;
 }
+
 #mine-counter-0,
 #mine-counter-1,
 #mine-counter-2,
 #timer {
-  width: 4ex;
+  width: 3.5ex;
 }
 .counter-icon {
   list-style-image: url(images.png);
@@ -35,41 +42,17 @@ colours for buttons:
   height: 14px;
 }
 
-
-
 #new-game-button { list-style-image: url(images.png); }
 .new-game-button-normal { -moz-image-region: rect(42px 17px 59px 0); }
 .new-game-button-won    { -moz-image-region: rect(42px 34px 59px 17px); }
 .new-game-button-lost   { -moz-image-region: rect(42px 51px 59px 34px); }
 
+.faded { opacity: 0.6; }
 
-
-/* kill all <button/> styles */
-.tile,
-.tile > .button-box,
-.tile > * > .button-icon,
-.tile > * > .button-text {
-  border: none;
-  margin: 0;
-  padding: 0;
-  min-width: 0;
-  -moz-appearance: none;
-  background: transparent;
-}
-
-.tile {
-  font-size: 14px;
-  font-weight: bold;
-  overflow: hidden;
-}
-
-
-
-/* general tile styles */
-.tile { list-style-image: url(images.png); }
-.button, .revealed { list-style-image: none; }
+.img { list-style-image: url(images.png); }
 
 .cross { -moz-image-region: rect(42px 70px 56px 56px); }
+.f0 { list-style-image: none; }
 .f1 { -moz-image-region: rect(0 14px 14px 0); }
 .f2 { -moz-image-region: rect(0 28px 14px 14px); }
 .f3 { -moz-image-region: rect(0 42px 14px 28px); }
@@ -92,31 +75,36 @@ colours for buttons:
 .e6 { -moz-image-region: rect(28px 84px 42px 70px); }
 .e7 { -moz-image-region: rect(28px 98px 42px 84px); }
 
+.txt[value="1"] { color: blue; }
+.txt[value="2"] { color: #008400; }
+.txt[value="3"] { color: red; }
+.txt[value="4"] { color: #000084; }
+.txt[value="5"] { color: #840000; }
+.txt[value="6"] { color: #008484; }
+.txt[value="7"] { color: #840084; }
 
-/* revealed tiles */
-.r1 { color: blue; }
-.r2 { color: #008400; }
-.r3 { color: red; }
-.r4 { color: #000084; }
-.r5 { color: #840000; }
-.r6 { color: #008484; }
-.r7 { color: #840084; }
+.txt[value="1"], .txt[value="2"], .txt[value="3"],
+.txt[value="4"], .txt[value="5"], .txt[value="6"],
+.txt[value="7"], .txt[value="8"], .txt[value="9"] {
+  font-weight: bold;
+}
 
+.txt {
+  text-align: center;
+  font-size: 14px;
+  vertical-align: middle;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
 
-
-/* square tile styles */
 .square {
   width: 18px;
   height: 18px;
+  -moz-box-sizing: border-box;
 }
-.square.mine, square.cross, .square.explosion { padding: 2px; }
 
-/* button styling is applied to the .button-box because it does not work#
-   when applied direct to .square.button */
-.square.button > .button-box,
-.square.flag > .button-box {
-  width: 14px;
-  height: 14px;
+.square.img {
   background: #ebe8d8;
   border: 2px solid;
   -moz-border-top-colors: #fefefe #f0eee1;
@@ -125,16 +113,15 @@ colours for buttons:
   -moz-border-bottom-colors: #716f64 #aba798;
 }
 
-
-
-/* hex tile styles */
 .hex {
   width: 22px;
   height: 20px;
-  padding: 3px 4px;
 }
-.hex.revealed { padding: 0; }
-.hex.button, .hex.flag { background: url(hex.png); }
+
+.hex.img {
+  background: url(hex.png);
+  padding: 3px 4px; /* so the image occupies 14px * 14px */
+}
 
 /* hex column styles for correct alignment */
 #hex-grid > vbox.evencolumn { margin-top: 10px; }

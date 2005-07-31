@@ -4,14 +4,14 @@
        xmlns="http://www.mozilla.org/2004/em-rdf#">
 
   <r:Description about="urn:mozilla:install-manifest">
-    <id>minesweeper</id>
+    <id>minesweeper@clav.mozdev.org</id>
 
-    <name>Minesweeper</name>
-    <version>0.8</version>
-    <description>The classic game, and a hexagonal variant</description>
+    <name>Mines</name>
+    <version>0.9</version>
+    <description>Like Minesweeper, but better</description>
 
     <creator>Stephen Clavering</creator>
-    <contributor>Percy Cabello (provided the Spanish translation)</contributor>
+    <contributor>Percy Cabello (Spanish translator)</contributor>
 
     <homepageURL>http://clav.mozdev.org/</homepageURL>
     <updateURL>http://clav.mozdev.org/updates.rdf</updateURL>
@@ -19,8 +19,8 @@
     <targetApplication>
       <r:Description>
         <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
-        <minVersion>0.9</minVersion>
-        <maxVersion>1.0</maxVersion>
+        <minVersion>1.0</minVersion>
+        <maxVersion>1.0+</maxVersion>
       </r:Description>
     </targetApplication>
 

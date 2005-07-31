@@ -18,17 +18,17 @@ const kMines = [null,
 ];
 
 
-var gCurrentDifficulty;
-var gTileShape;
-var gMinesPerTile;
+var gCurrentDifficulty = 1;
+var gTileShape = SQUARE;
+var gMinesPerTile = 1;
 
 var gNoMinesAtEdges = false;
 
 var gPrefs; // an nsIPrefBranch
 
 const ui = {
-  pauseCmd: "cmd.pause",
-  pauseMsg: "msg.pause",
+  pauseCmd: "cmd-pause",
+  pauseMsg: "msg-pause",
   smileyFace: "new-game-button"
 };
 
@@ -44,17 +44,14 @@ window.onload = function() {
   gPrefs = gPrefs.getBranch("games.minesweeper.");
 
   // restore difficulty level
-  gCurrentDifficulty = 1;
   try { gCurrentDifficulty = gPrefs.getIntPref("difficulty-level"); } catch(e) {}
   document.getElementById("dif-"+gCurrentDifficulty).setAttribute("checked","true");
 
   // restore tile shape
-  gTileShape = SQUARE;
   try { gTileShape = gPrefs.getCharPref("tile-shape"); } catch(e) {}
   document.getElementById("shape-"+gTileShape).setAttribute("checked","true");
 
   // restore mines-per-tile
-  gMinesPerTile = 1;
   try { gMinesPerTile = gPrefs.getIntPref("mines-per-tile"); } catch(e) {}
   document.getElementById("minespertile-"+gMinesPerTile).setAttribute("checked","true");
 
@@ -113,14 +110,13 @@ function toggleNoMinesAtEdges(menuitem) {
 
 
 function togglePause() {
+  const box = Grid.container;
   if(Game.paused) {
     ui.pauseMsg.hidden = true;
     Timer.start();
-    addMouseHandlers(false);
   } else {
     ui.pauseMsg.hidden = false;
     Timer.stop();
-    removeMouseHandlers();
   }
   Game.paused = !Game.paused
 }
@@ -166,12 +162,14 @@ var Game = {
     Timer.reset();
     ui.pauseMsg.hidden = true;
     ui.smileyFace.setFace("normal");
+    Grid.container.oncontextmenu = onRightClick;
     if(gNoMinesAtEdges) {
       Grid.revealEdges();
-      addMouseHandlers(false);
+      Grid.container.onclick = onClick;
+      ui.pauseCmd.removeAttribute("disabled");
       Timer.start();
     } else {
-      addMouseHandlers(true);
+      Grid.container.onclick = onSafeClick;
     }
   },
 
@@ -198,14 +196,13 @@ var Game = {
     this.inProgress = false;
     this.paused = false;
     Timer.stop();
-    removeMouseHandlers();
+    Grid.container.onclick = null;
+    Grid.container.oncontextmenu = null;
     ui.pauseCmd.setAttribute("disabled", "true");
   }
 }
 
 
-
-// === the grid, both square and hex versions =============
 
 var Grid = null; // set to one of HexGrid or SquareGrid
 
@@ -277,9 +274,10 @@ var GridBase = {
       this.elements[x] = new Array(height);
       var col = this.columns[x] = document.createElement("vbox");
       for(var y = 0; y < height; y++) {
-        var el = this.createTile(x,y,this.tileClassPrefix);
+        var el = new Tile(x, y, this.tileClassPrefix);
         this.elements[x][y] = el;
-        col.appendChild(el);
+        col.appendChild(el.txt);
+        col.appendChild(el.img);
       }
       if(x%2==0) col.className = "evencolumn"; // needed for alignment in hexagonal games
       this.container.appendChild(col);
@@ -312,142 +310,35 @@ var GridBase = {
   },
 
   updateForGameLost: function() {
-    // show mines and incorrect flags
-    for(var x = 0; x < this.width; x++) {
-      for(var y = 0; y < this.height; y++) {
-        var el = this.elements[x][y];
+    const els = this.elements, w = this.width, h = this.height;
+    for(var x = 0; x != w; ++x) {
+      for(var y = 0; y != h; ++y) {
+        var el = els[x][y];
         if(el.mines) {
-          if(el.mines != el.flags) el.className = el.classPrefix+"mine m"+el.mines;
+          if(el.mines != el.flags) el.img.className = el.imgClassPrefix + "m" + el.mines;
         } else {
-          if(el.flags) el.className = el.classPrefix+("cross");
+          if(el.flags) el.img.className = el.imgClassPrefix + "cross";
         }
       }
     }
   },
 
   updateForGameWon: function() {
-    // flag remaining mines
+    // flag remaining mines (also fixes incorrect flag numbers)
     for(var x = 0; x < this.width; x++) {
       for(var y = 0; y < this.height; y++) {
         var el = this.elements[x][y];
-        if(el.mines && !el.flags) el.className = el.classPrefix+"flag f"+el.mines;
+        if(el.mines != el.flags) el.img.className = el.imgClassPrefix + "f" + el.mines;
       }
     }
     MineCounters.resetAll();
-  },
-
-  // The appearance of tiles is controlled by their class attribute.  This always includes
-  // "tile", and either "hex" or "square".  And will include one of "button", "flag f{n}",
-  // "revealed r{n}" or "explosion e{n}" where {n} is a number
-  createTile: function(x, y, classPrefix) {
-    var el = document.createElement("button");
-    el.x = x;
-    el.y = y;
-    el.classPrefix = "tile "+classPrefix;
-    // an array of adjacent elements, created after the grid of elements is created
-    el.adjacent = [];
-    for(var i in tileMethods) el[i] = tileMethods[i];
-    el.reset();
-    return el;
   }
 };
-
-
-const tileMethods = {
-  reset: function() {
-      this.flags = 0;
-      this.revealed = false;
-      this.mines = 0;
-      this.number = 0;
-      this.removeAttribute("label");
-      this.className = this.classPrefix+"button";
-  },
-
-  toggleFlag: function() {
-      if(this.revealed) return;
-      if(this.flags == Game.maxFlags) {
-        MineCounters.increase(this.flags);
-        this.flags = 0;
-        this.className = this.classPrefix+"button";
-      } else {
-        if(this.flags) MineCounters.increase(this.flags);
-        this.flags++;
-        MineCounters.decrease(this.flags);
-        this.className = this.classPrefix+"flag f"+this.flags;
-      }
-  },
-
-    // remove one flag
-  unflag: function() {
-      MineCounters.increase(this.flags);
-      var fl = --this.flags;
-      if(fl) {
-        MineCounters.decrease(fl);
-        this.className = this.classPrefix+"flag f"+fl;
-      } else {
-        this.className = this.classPrefix+"button";
-      }
-  },
-
-    // we want to treat flagged tiles differently from reveal() (which is used by revealAround etc. too)
-  onLeftClick: function() {
-      if(this.revealed) this.tryRevealAround();
-      else if(this.flags) this.unflag();
-      else this.reveal();
-  },
-
-  reveal: function() {
-      if(this.revealed || this.flags) return;
-      if(this.mines) {
-        Game.lose();
-        this.className = this.classPrefix+"explosion e"+this.mines;
-      } else {
-        this.revealed = true;
-        Game.squaresRevealed++;
-        this.className = this.classPrefix+"revealed r"+this.number;
-        if(this.number) this.setAttribute("label",this.number);
-        // if its a blank square reveal round it
-        else this.revealAround();
-        Game.checkWon();
-      }
-  },
-
-    // used both to reveal a whole area when a zero is revealed,
-    // and to reveal around an element when it is middle-clicked (or clicked with both buttons)
-  revealAround: function() {
-      for(var i = 0; i < this.adjacent.length; i++) {
-        var adj = this.adjacent[i];
-        if(!adj.revealed) adj.reveal();
-      }
-  },
-
-    // if enough flags have been placed around the element then the remaining unflagged
-    // squares will be revealed. this can kill the player if the flags are in the wrong place
-  tryRevealAround: function() {
-      if(this.revealed && this.hasEnoughFlags())
-        this.revealAround();
-  },
-
-  hasEnoughFlags: function() {
-      var flags = 0;
-      for(var i = 0; i < this.adjacent.length; i++) {
-        var f = this.adjacent[i].flags;
-        if(f) flags += f;
-      }
-      return (flags==this.number);
-  }
-}
-
-
-
-
-
 
 var HexGrid = {
   __proto__: GridBase,
 
-  // prefixed onto the className of every <image> being used as a tile in the grid.
-  tileClassPrefix: "hex ",
+  tileClassPrefix: "hex",
 
   init: function() {
     this.container = document.getElementById("hex-grid");
@@ -481,7 +372,6 @@ var HexGrid = {
       }
     }
   },
-
 
   hexHalfHeight: 10,
   hexFullHeight: 20,
@@ -536,12 +426,10 @@ var HexGrid = {
   }
 }
 
-
-
 var SquareGrid = {
   __proto__: GridBase,
 
-  tileClassPrefix: "square ",
+  tileClassPrefix: "square",
 
   init: function() {
     this.container = document.getElementById("square-grid");
@@ -571,11 +459,94 @@ var SquareGrid = {
   },
 
   getEventTarget: function(e) {
-    return e.target;
+    const t = e.target;
+    return this.elements[t.x][t.y];
   }
 }
 
 
+
+function Tile(x, y, shape) {
+  const txt = this.txt = document.createElement("label");
+  const img = this.img = document.createElement("image");
+  img.x = txt.x = this.x = x;
+  img.y = txt.y = this.y = y;
+  txt.className = shape+" txt";
+  this.imgClassPrefix = shape+" img ";
+  this.adjacent = []; // filled in later
+  this.reset();
+}
+
+Tile.prototype = {
+  reset: function() {
+    this.flags = 0;
+    this.revealed = false;
+    this.mines = 0;
+    this.number = 0;
+    this.img.hidden = false;
+    this.txt.hidden = true;
+    this.img.className = this.imgClassPrefix + "f0";
+  },
+
+  addOneFlagOrRemoveAll: function() {
+    var f = this.flags;
+    if(f) MineCounters.increase(f);
+    f = this.flags = f == Game.maxFlags ? 0 : f + 1;
+    if(f) MineCounters.decrease(f);
+    this.img.className = this.imgClassPrefix + "f" + f;
+  },
+
+  removeOneFlag: function() {
+    MineCounters.increase(this.flags);
+    var f = --this.flags;
+    if(f) MineCounters.decrease(f);
+    this.img.className = this.imgClassPrefix + "f" + f;
+  },
+
+  onLeftClick: function() {
+    if(this.flags) this.removeOneFlag();
+    else if(!this.revealed) this.reveal();
+    else if(this.hasEnoughSurroundingFlags()) this.revealAround();
+  },
+
+  onRightClick: function() {
+    // this happens on right click (as well as left click) so that it still works for
+    // click-with-both-buttons
+    if(!this.revealed) this.addOneFlagOrRemoveAll();
+    else if(this.hasEnoughSurroundingFlags()) this.revealAround();
+  },
+
+  hasEnoughSurroundingFlags: function() {
+    const adj = this.adjacent, num = adj.length;
+    var flags = 0;
+    for(var i = 0; i != num; ++i) flags += adj[i].flags;
+    return flags == this.number;
+  },
+
+  reveal: function() {
+    if(this.mines) {
+      Game.lose();
+      this.img.className = this.imgClassPrefix+"e"+this.mines;
+    } else {
+      this.revealed = true;
+      Game.squaresRevealed++;
+      this.img.hidden = true;
+      if(this.number) this.txt.setAttribute("value", this.number);
+      else this.txt.removeAttribute("value");
+      this.txt.hidden = false;
+      if(!this.number) this.revealAround();
+      Game.checkWon();
+    }
+  },
+
+  revealAround: function() {
+    const adj = this.adjacent, num = adj.length;
+    for(var i = 0; i != num; ++i) {
+      var el = adj[i];
+      if(!el.revealed && !el.flags) adj[i].reveal();
+    }
+  }
+}
 
 
 
@@ -606,8 +577,6 @@ var Timer = {
     this.display.value = 0;
   }
 }
-
-
 
 
 
@@ -655,36 +624,24 @@ var MineCounters = {
 
 
 
-
-// The first click should be safe (never hit a mine) and start
-// the timer unless playing in no-mines-at-edges mode
-function addMouseHandlers(safeFirstClick) {
-  Grid.container.onclick = mouseClick;
-  if(safeFirstClick) gIsSafeMouseClick = true;
-}
-
-function removeMouseHandlers() {
-  Grid.container.onclick = null;
-}
-
-var gIsSafeMouseClick = false;
-
-function mouseClick(e) {
+function onSafeClick(e) {
+  if(e.button==2 || e.ctrlKey) return;
   const el = Grid.getEventTarget(e);
+  if(!el) return;
+  while(el.mines) Game._newLikeCurrent();
+  Timer.start();
+  Grid.container.onclick = onClick;
+  ui.pauseCmd.removeAttribute("disabled");
+  el.onLeftClick();
+}
 
-  // make the first click always safe (if it's a left-click)
-  if(gIsSafeMouseClick) {
-    gIsSafeMouseClick = false;
-    if(e.button==0) {
-      while(el.mines) Game._newLikeCurrent();
-      Timer.start();
-      ui.pauseCmd.removeAttribute("disabled");
-    }
-  }
+function onClick(e) {
+  if(e.button==2 || e.ctrlKey) return;
+  const el = Grid.getEventTarget(e);
+  if(el) el.onLeftClick();
+}
 
-  if(e.button==2 || e.ctrlKey) {
-    el.toggleFlag();
-  } else {
-    el.onLeftClick();
-  }
+function onRightClick(e) {
+  const el = Grid.getEventTarget(e);
+  if(el) el. onRightClick();
 }

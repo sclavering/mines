@@ -14,14 +14,14 @@
 <script type="application/x-javascript" src="minesweeper.js"/>
 
 <commandset id="commands">
-  <command id="cmd.new" oncommand="newGame();"/>
-  <command id="cmd.pause" oncommand="togglePause();"/>
+  <command id="cmd-new" oncommand="newGame();"/>
+  <command id="cmd-pause" oncommand="togglePause();"/>
 </commandset>
 
 <toolbox id="main-toolbox">
   <toolbar id="main-toolbar">
-    <toolbarbutton id="new-game-button" command="cmd.new" label="&newgame;"/>
-    <toolbarbutton id="btn.pause" command="cmd.pause" label="Pause"/>
+    <toolbarbutton id="new-game-button" command="cmd-new" label="&newgame;"/>
+    <toolbarbutton id="btn.pause" command="cmd-pause" label="Pause"/>
     <toolbarbutton type="menu" id="btn.settings" label="Settings">
       <menupopup id="game-menu-popup">
         <menuitem type="radio" id="dif-0" name="difficulty" label="&beginner;" oncommand="newGame(0);"/>
@@ -51,7 +51,7 @@
 
 
 <hbox id="main-panel">
-  <vbox id="status-panel" align="start">
+  <vbox id="status-panel">
 
     <label id="timer"/>
 
@@ -86,9 +86,9 @@
   </vbox>
 
   <stack id="game-panel">
-    <hbox id="square-grid"/>
-    <hbox id="hex-grid"/>
-    <label id="msg.pause" hidden="true" value="Paused" flex="1"/>
+    <box id="square-grid" hidden="true"/>
+    <box id="hex-grid" hidden="true"/>
+    <label id="msg-pause" onclick="togglePause();" value="Paused"/>
   </stack>
 </hbox>
 
