@@ -1,8 +1,8 @@
 <!ENTITY Minesweeper "Mines">
 
-<!ENTITY gamemenu "Game">
-
 <!ENTITY newgame "New">
+<!ENTITY pause "Pause">
+<!ENTITY settings "Settings">
 
 <!ENTITY beginner "Beginner">
 <!ENTITY intermediate "Intermediate">
@@ -20,4 +20,6 @@
 <!ENTITY minespertile.6 "Six or fewer">
 <!ENTITY minespertile.7 "Seven or fewer">
 
-<!ENTITY exit "Exit">
+<!ENTITY nominesatedges "No mines at edges">
+
+<!ENTITY paused "Paused">

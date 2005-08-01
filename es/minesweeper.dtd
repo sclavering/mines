@@ -1,8 +1,8 @@
 <!ENTITY Minesweeper "Buscaminas">
 
-<!ENTITY gamemenu "Juego">
-
 <!ENTITY newgame "Nuevo">
+<!ENTITY pause "Pause">
+<!ENTITY settings "Settings">
 
 <!ENTITY beginner "Principiante">
 <!ENTITY intermediate "Intermedio">
@@ -20,4 +20,6 @@
 <!ENTITY minespertile.6 "Seises o menos">
 <!ENTITY minespertile.7 "Siete o menos">
 
-<!ENTITY exit "Salir">
+<!ENTITY nominesatedges "No mines at edges">
+
+<!ENTITY paused "Paused">

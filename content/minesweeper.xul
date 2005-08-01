@@ -21,9 +21,9 @@
 <toolbox id="main-toolbox">
   <toolbar id="main-toolbar">
     <toolbarbutton id="new-game-button" command="cmd-new" label="&newgame;"/>
-    <toolbarbutton id="btn.pause" command="cmd-pause" label="Pause"/>
-    <toolbarbutton type="menu" id="btn.settings" label="Settings">
-      <menupopup id="game-menu-popup">
+    <toolbarbutton id="pause-button" command="cmd-pause" label="&pause;"/>
+    <toolbarbutton id="settings-button" type="menu" label="&settings;">
+      <menupopup>
         <menuitem type="radio" id="dif-0" name="difficulty" label="&beginner;" oncommand="newGame(0);"/>
         <menuitem type="radio" id="dif-1" name="difficulty" label="&intermediate;" oncommand="newGame(1);"/>
         <menuitem type="radio" id="dif-2" name="difficulty" label="&expert;" oncommand="newGame(2);"/>
@@ -43,7 +43,7 @@
           </menupopup>
         </menu>
         <menuseparator/>
-        <menuitem type="checkbox" id="nominesatedges" label="No mines at edges" oncommand="toggleNoMinesAtEdges(this);"/>
+        <menuitem type="checkbox" id="nominesatedges" label="&nominesatedges;" oncommand="toggleNoMinesAtEdges(this);"/>
       </menupopup>
     </toolbarbutton>
   </toolbar>
@@ -88,7 +88,7 @@
   <stack id="game-panel">
     <box id="square-grid" hidden="true"/>
     <box id="hex-grid" hidden="true"/>
-    <label id="msg-pause" onclick="togglePause();" value="Paused"/>
+    <label id="msg-pause" onclick="togglePause();" value="&paused;"/>
   </stack>
 </hbox>
 
