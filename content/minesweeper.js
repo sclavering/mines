@@ -222,15 +222,18 @@ const Grid = {
   // create a new mine layout and display it
   newGrid: function(width, height, mines) {
     var x, y;
-    // resize the grid if required
+    // Resize the grid if required
     if(width != this.width || height != this.height) {
-      this.setSize(width, height);
-    } else {
-      // clear every element in the grid
-      for(x = 0; x != width; ++x)
-        for(y = 0; y != height; ++y)
-          this.elements[x][y].reset();
+      this.width = width;
+      this.height = height;
+      const es = this.elements = new Array(width);
+      for(var x = 0; x != width; ++x) es[x] = [];
+      this.adjacents = this.computeAdjacents(width, height);
     }
+    // Create fresh Tile objects
+    for(x = 0; x != width; ++x)
+      for(y = 0; y != height; ++y)
+        this.elements[x][y] = new Tile(x, y);
 
     const maxx = width - 1, maxy = height - 1;
     // create the required number of mines, and set the number for other elements
@@ -254,19 +257,6 @@ const Grid = {
     }
   },
 
-  setSize: function(width, height) {
-    this.width = width;
-    this.height = height;
-    this.elements = new Array(width);
-    for(var x = 0; x < width; x++) {
-      this.elements[x] = new Array(height);
-      for(var y = 0; y < height; y++) {
-        this.elements[x][y] = new Tile(x, y);
-      }
-    }
-    this.adjacents = this.computeAdjacents(width, height);
-  },
-
   getElement: function(x, y) {
     // bounds checked because it's useful to the callers
     if(x>=0 && x<this.width && y>=0 && y<this.height)
@@ -284,15 +274,15 @@ const Grid = {
     const maxx = w - 1, maxy = h - 1;
     for(var y = 0; y != h; ++y) {
       var el = es[0][y];
-      if(!el.revealed) el.reveal();
+      if(!el.revealed) this.reveal(el);
       el = es[maxx][y];
-      if(!el.revealed) el.reveal();
+      if(!el.revealed) this.reveal(el);
     }
     for(var x = 1; x != maxx; ++x) {
       el = es[x][0];
-      if(!el.revealed) el.reveal();
+      if(!el.revealed) this.reveal(el);
       el = es[x][maxy];
-      if(!el.revealed) el.reveal();
+      if(!el.revealed) this.reveal(el);
     }
   },
 
@@ -302,9 +292,9 @@ const Grid = {
       for(var y = 0; y != h; ++y) {
         var el = els[x][y];
         if(el.mines) {
-          if(el.mines != el.flags) view.update(x, y, "mine", el.mines);
+          if(el.mines != el.flags) view.update(el, "mine", el.mines);
         } else {
-          if(el.flags) view.update(x, y, "cross");
+          if(el.flags) view.update(el, "cross");
         }
       }
     }
@@ -315,86 +305,78 @@ const Grid = {
     for(var x = 0; x < this.width; x++) {
       for(var y = 0; y < this.height; y++) {
         var el = this.elements[x][y];
-        if(el.mines != el.flags) view.update(x, y, "flag", el.mines);
+        if(el.mines != el.flags) view.update(el, "flag", el.mines);
       }
     }
     MineCounters.resetAll();
-  }
-};
-
-
-
-
-function Tile(x, y, shape) {
-  this.x = x;
-  this.y = y;
-  this.reset();
-}
-
-Tile.prototype = {
-  reset: function() {
-    this.flags = 0;
-    this.revealed = false;
-    this.mines = 0;
-    this.number = 0;
   },
 
-  addOneFlagOrRemoveAll: function() {
-    var f = this.flags;
+  addOneFlagOrRemoveAll: function(tile) {
+    var f = tile.flags;
     if(f) MineCounters.increase(f);
-    f = this.flags = f == Game.maxFlags ? 0 : f + 1;
+    f = tile.flags = f == Game.maxFlags ? 0 : f + 1;
     if(f) MineCounters.decrease(f);
-    view.update(this.x, this.y, "flag", f);
+    view.update(tile, "flag", f);
   },
 
-  removeOneFlag: function() {
-    MineCounters.increase(this.flags);
-    var f = --this.flags;
+  removeOneFlag: function(tile) {
+    MineCounters.increase(tile.flags);
+    var f = --tile.flags;
     if(f) MineCounters.decrease(f);
-    view.update(this.x, this.y, "flag", f);
+    view.update(tile, "flag", f);
   },
 
-  onLeftClick: function() {
-    if(this.flags) this.removeOneFlag();
-    else if(!this.revealed) this.reveal();
-    else if(this.hasEnoughSurroundingFlags()) this.revealAround();
+  onLeftClick: function(tile) {
+    if(tile.flags) this.removeOneFlag(tile);
+    else if(!tile.revealed) this.reveal(tile);
+    else if(this.hasEnoughSurroundingFlags(tile)) this.revealAround(tile);
   },
 
-  onRightClick: function() {
+  onRightClick: function(tile) {
     // this happens on right click (as well as left click) so that it still works for
     // click-with-both-buttons
-    if(!this.revealed) this.addOneFlagOrRemoveAll();
-    else if(this.hasEnoughSurroundingFlags()) this.revealAround();
+    if(!tile.revealed) this.addOneFlagOrRemoveAll(tile);
+    else if(this.hasEnoughSurroundingFlags(tile)) this.revealAround(tile);
   },
 
-  hasEnoughSurroundingFlags: function() {
-    const adj = Grid.adjacents[this.x][this.y], num = adj.length;
+  hasEnoughSurroundingFlags: function(tile) {
+    const adj = Grid.adjacents[tile.x][tile.y], num = adj.length;
     var flags = 0;
     for(var i = 0; i != num; ++i) flags += Grid.getElement2(adj[i]).flags;
-    return flags == this.number;
+    return flags == tile.number;
   },
 
-  reveal: function() {
-    if(this.mines) {
+  reveal: function(tile) {
+    if(tile.mines) {
       Game.lose();
-      view.update(this.x, this.y, "bang", this.mines);
+      view.update(tile, "bang", tile.mines);
     } else {
-      this.revealed = true;
+      tile.revealed = true;
       Game.squaresRevealed++;
-      view.update(this.x, this.y, "clear", this.number);
-      if(!this.number) this.revealAround();
+      view.update(tile, "clear", tile.number);
+      if(!tile.number) this.revealAround(tile);
       Game.checkWon();
     }
   },
 
-  revealAround: function() {
-    const adj = Grid.adjacents[this.x][this.y], num = adj.length;
+  revealAround: function(tile) {
+    const adj = Grid.adjacents[tile.x][tile.y], num = adj.length;
     for(var i = 0; i != num; ++i) {
       var el = Grid.getElement2(adj[i]);
-      if(!el.revealed && !el.flags) el.reveal();
+      if(!el.revealed && !el.flags) this.reveal(el);
     }
   }
 }
+
+function Tile(x, y) {
+  this.x = x;
+  this.y = y;
+  this.revealed = false;
+  this.flags = 0;
+  this.mines = 0;
+  this.number = 0;
+}
+
 
 
 function hexComputeAdjacents(width, height) {
@@ -418,9 +400,9 @@ function hexComputeAdjacents(width, height) {
         if(down < height) adj.push([right, down]); // down right
       }
       if(y + 1 < height) adj.push([x, y + 1]);     // *straight* down
-      dump("adjacent to ("+x+","+y+") are: ");
-      for each(a in map[x][y]) dump("(" + a + ") ");
-      dump("\n");
+//       dump("adjacent to ("+x+","+y+") are: ");
+//       for each(a in map[x][y]) dump("(" + a + ") ");
+//       dump("\n");
     }
   }
   return map;
@@ -535,7 +517,7 @@ function safeFirstClickHandler(event) {
   Timer.start();
   svgDoc.onclick = mainClickHandler;
   ui.pauseCmd.removeAttribute("disabled");
-  el.onLeftClick();
+  Grid.onLeftClick(el);
 }
 
 function mainClickHandler(event) {
@@ -543,9 +525,9 @@ function mainClickHandler(event) {
   const t = event.target, x = t.minesweeperX, y = t.minesweeperY;
   const el = Grid.elements[x][y];
   if(event.button == 2 || event.ctrlKey) {
-    el.onRightClick();
+    Grid.onRightClick(el);
   } else {
-    el.onLeftClick();
+    Grid.onLeftClick(el);
   }
 }
 
@@ -640,7 +622,7 @@ const view = {
     for(var x = 0; x != width; ++x) {
       var dy = x % 2 ? 0 : half_height;
       for(var y = 0; y != height; ++y)
-        this._redoTile(x,  y, col_width * x, half_height * 2 * y + dy);
+        this._redoTile(x, y, col_width * x, half_height * 2 * y + dy);
     }
   },
 
@@ -689,8 +671,8 @@ const view = {
   },
 
   // Update a tile
-  update: function(x, y, string, number) {
+  update: function(tile, string, number) {
     if(typeof number != "undefined") string += "-" + number;
-    this._grid[x][y].setAttributeNS(XLINK, "href", "#hex-" + string);
+    this._grid[tile.x][tile.y].setAttributeNS(XLINK, "href", "#hex-" + string);
   }
 }
