@@ -1,0 +1,19 @@
+<!ENTITY Minesweeper "Мины">
+<!ENTITY newgame "Новая игра">
+<!ENTITY pause "Пауза">
+<!ENTITY settings "Настройки">
+<!ENTITY beginner "Новичок">
+<!ENTITY intermediate "Специалист">
+<!ENTITY expert "Эксперт">
+<!ENTITY squaretiles "Квадраты">
+<!ENTITY hextiles "Соты">
+<!ENTITY minespertile "Мин в ячейке">
+<!ENTITY minespertile.1 "Одна или меньше">
+<!ENTITY minespertile.2 "Две или меньше">
+<!ENTITY minespertile.3 "Три или меньше">
+<!ENTITY minespertile.4 "Четыре или меньше">
+<!ENTITY minespertile.5 "Пять или меньше">
+<!ENTITY minespertile.6 "Шесть или меньше">
+<!ENTITY minespertile.7 "Семь или меньше">
+<!ENTITY nominesatedges "Без мин по углам">
+<!ENTITY paused "Приостановлено">
