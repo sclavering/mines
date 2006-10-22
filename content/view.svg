@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="view.css" type="text/css"?>
+
+<svg xmlns="http://www.w3.org/2000/svg"
+    xmlns:svg="http://www.w3.org/2000/svg"
+    xmlns:xl="http://www.w3.org/1999/xlink"
+    version="1.0"
+    viewBox="0 0 1000 1000"
+    preserveAspectRatio="xMidYMid meet"
+    >
+  <defs id="defs">
+    <path id="hex" class="shape hex" d="M 112,0 L 37,0 L 0,65 L 37,130 L 112,130 L 149,65 z"/>
+    <path id="sqr" class="shape sqr" d="L 50,0 50,50 0,50 z"/>
+    <!-- Tiles with zero flags, in button mode -->
+    <g id="sqr-flag-0" class="tile sqrtile flag"><use xl:href="#sqr"/></g>
+    <g id="hex-flag-0" class="tile hextile flag"><use xl:href="#hex"/></g>
+    <g id="sqr-clear-0" class="tile sqrtile clear"><use xl:href="#sqr"/></g>
+    <g id="hex-clear-0" class="tile hextile clear"><use xl:href="#hex"/></g>
+  </defs>
+</svg>

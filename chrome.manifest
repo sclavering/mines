@@ -1,0 +1,5 @@
+overlay  chrome://browser/content/browser.xul  chrome://minesweeper/content/overlay.xul
+
+content  minesweeper  jar:minesweeper.jar!/content/
+locale  minesweeper  en  jar:minesweeper.jar!/en/
+locale  minesweeper  es  jar:minesweeper.jar!/es/

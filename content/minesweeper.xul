@@ -8,7 +8,7 @@
   windowtype="minesweeper"
   id="minesweeper-window2"
   title="&Minesweeper;"
-  persist="screenX screenY"
+  persist="screenX screenY width height"
   >
 
 <script type="application/x-javascript" src="minesweeper.js"/>
@@ -50,7 +50,7 @@
 </toolbox>
 
 
-<hbox id="main-panel">
+<hbox id="main-panel" flex="1">
   <vbox id="status-panel">
 
     <label id="timer"/>
@@ -85,11 +85,8 @@
     </hbox>
   </vbox>
 
-  <stack id="game-panel">
-    <box id="square-grid" hidden="true"/>
-    <box id="hex-grid" hidden="true"/>
-    <label id="msg-pause" onclick="togglePause();" value="&paused;"/>
-  </stack>
+  <iframe src="view.svg" flex="1" id="svgdoc"/>
+  <label id="msg-pause" onclick="togglePause();" value="&paused;"/>
 </hbox>
 
 </window>

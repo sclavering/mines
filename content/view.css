@@ -1,0 +1,23 @@
+/* * { stroke: black; stroke-width: 4px; fill-rule: evenodd; } */
+/* text { stroke: none } */
+
+/* .hex:hover { fill-opacity: 0.1 } */
+
+.clear .shape {
+  stroke: grey;
+  stroke-width: 2px;
+  fill: lightgrey;
+}
+.flag .shape {
+  stroke: black;
+  stroke-width: 2px;
+  fill: darkgrey;
+}
+
+.hextile text {
+  font-size: 70px;
+  /* have the co-ords of the element refer to the h- and v-centre of the text */
+  text-anchor: middle;
+  dominant-baseline: middle;
+  stroke: purple;
+}

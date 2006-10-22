@@ -27,12 +27,17 @@ var gNoMinesAtEdges = false;
 var gPrefs; // an nsIPrefBranch
 
 const ui = {
+  svgFrame: "svgdoc",
   pauseCmd: "cmd-pause",
   pauseMsg: "msg-pause",
   smileyFace: "new-game-button"
 };
 
+// The SVGDocument and Window in which the grid is displayed
+var svgDoc = null;
+var svgWin = null;
 
+// This is assumed to happen after the SVG document is loaded too. Seems to work :)
 window.onload = function() {
   for(var i in ui) ui[i] = document.getElementById(ui[i]);
 
@@ -55,11 +60,12 @@ window.onload = function() {
   try { gMinesPerTile = gPrefs.getIntPref("mines-per-tile"); } catch(e) {}
   document.getElementById("minespertile-"+gMinesPerTile).setAttribute("checked","true");
 
+  svgWin = ui.svgFrame.contentWindow;
+  svgDoc = svgWin.document;
+  init_svg(7); // we allow 7 mines in a square
+
   Timer.init();
   MineCounters.init();
-  SquareGrid.init();
-  HexGrid.init();
-
   setTileShape(gTileShape);
 };
 
@@ -69,7 +75,7 @@ function newGame(difficulty) {
     gCurrentDifficulty = difficulty;
     gPrefs.setIntPref("difficulty-level", difficulty);
     Game.newGame(kWidths[difficulty], kHeights[difficulty], kMines[gMinesPerTile][difficulty]);
-    sizeToContent();
+//     sizeToContent();
   } else {
     Game.newLikeCurrent();
   }
@@ -94,11 +100,8 @@ function setTileShape(shape) {
   gPrefs.setCharPref("tile-shape", shape);
 
   Game.end();
-
-  if(Grid) Grid.hide();
   Grid = (shape==HEXAGONAL) ? HexGrid : SquareGrid;
-  Grid.show();
-
+  view.tileShape = (shape==HEXAGONAL) ? "hex" : "sqr";
   newGame(gCurrentDifficulty);
 }
 
@@ -110,7 +113,6 @@ function toggleNoMinesAtEdges(menuitem) {
 
 
 function togglePause() {
-  const box = Grid.container;
   if(Game.paused) {
     ui.pauseMsg.hidden = true;
     Timer.start();
@@ -162,14 +164,14 @@ var Game = {
     Timer.reset();
     ui.pauseMsg.hidden = true;
     ui.smileyFace.setFace("normal");
-    Grid.container.oncontextmenu = onRightClick;
+    view.showGrid(this.width, this.height);
     if(gNoMinesAtEdges) {
       Grid.revealEdges();
-      Grid.container.onclick = onClick;
+      svgDoc.onclick = mainClickHandler;
       ui.pauseCmd.removeAttribute("disabled");
       Timer.start();
     } else {
-      Grid.container.onclick = onSafeClick;
+      svgDoc.onclick = safeFirstClickHandler;
     }
   },
 
@@ -196,8 +198,7 @@ var Game = {
     this.inProgress = false;
     this.paused = false;
     Timer.stop();
-    Grid.container.onclick = null;
-    Grid.container.oncontextmenu = null;
+    svgDoc.onclick = null;
     ui.pauseCmd.setAttribute("disabled", "true");
   }
 }
@@ -210,22 +211,10 @@ var GridBase = {
   width: 0,
   height: 0,
 
-  // a 2d array of the <image> elements that make up the board
-  // always contains truewidth*trueheight elements
+  // A 2d array of the Tile objects.  Do elements[x][y], not [y][x]
+  // Note: for hexagonal games the even columns are the ones offset vertically
+  // (this is assumed throughout the code).
   elements: [],
-  // columns are <vbox>s
-  columns: [],
-  // the main hbox for the elements to be shown in
-  // HexGrid and SquareGrid provide init() methods to initialise this
-  container: null,
-
-  // show or hide the whole grid
-  hide: function() {
-    this.container.hidden = true;
-  },
-  show: function() {
-    this.container.hidden = false;
-  },
 
   // create a new mine layout and display it
   newGrid: function(width, height, mines) {
@@ -262,25 +251,14 @@ var GridBase = {
   },
 
   setSize: function(width, height) {
-    // remove the old grid
-    while(this.container.hasChildNodes())
-      this.container.removeChild(this.container.lastChild);
-    // create + add/show the new one
     this.width = width;
     this.height = height;
     this.elements = new Array(width);
-    this.columns = new Array(width);
     for(var x = 0; x < width; x++) {
       this.elements[x] = new Array(height);
-      var col = this.columns[x] = document.createElement("vbox");
       for(var y = 0; y < height; y++) {
-        var el = new Tile(x, y, this.tileClassPrefix);
-        this.elements[x][y] = el;
-        col.appendChild(el.txt);
-        col.appendChild(el.img);
+        this.elements[x][y] = new Tile(x, y);
       }
-      if(x%2==0) col.className = "evencolumn"; // needed for alignment in hexagonal games
-      this.container.appendChild(col);
     }
     this.setAdjacents();
   },
@@ -315,9 +293,9 @@ var GridBase = {
       for(var y = 0; y != h; ++y) {
         var el = els[x][y];
         if(el.mines) {
-          if(el.mines != el.flags) el.img.className = el.imgClassPrefix + "m" + el.mines;
+          if(el.mines != el.flags) view.update(x, y, "mine", el.mines);
         } else {
-          if(el.flags) el.img.className = el.imgClassPrefix + "cross";
+          if(el.flags) view.update(x, y, "cross");
         }
       }
     }
@@ -328,7 +306,7 @@ var GridBase = {
     for(var x = 0; x < this.width; x++) {
       for(var y = 0; y < this.height; y++) {
         var el = this.elements[x][y];
-        if(el.mines != el.flags) el.img.className = el.imgClassPrefix + "f" + el.mines;
+        if(el.mines != el.flags) view.update(x, y, "flag", el.mines);
       }
     }
     MineCounters.resetAll();
@@ -337,12 +315,6 @@ var GridBase = {
 
 var HexGrid = {
   __proto__: GridBase,
-
-  tileClassPrefix: "hex",
-
-  init: function() {
-    this.container = document.getElementById("hex-grid");
-  },
 
   // give each element a list of those elements adjacent to it
   setAdjacents: function() {
@@ -371,69 +343,11 @@ var HexGrid = {
         this.elements[x][y].adjacent = adjs;
       }
     }
-  },
-
-  hexHalfHeight: 10,
-  hexFullHeight: 20,
-  hexSlopeWidth: 5,
-  hexTileWidth:  17,
-
-  getEventTarget: function(e) {
-    var xcoord = e.pageX - this.container.boxObject.x;
-    var ycoord = e.pageY - this.container.boxObject.y;
-
-    var xtile = Math.floor(xcoord / this.hexTileWidth);
-    var evenCol = (xtile % 2 == 0);
-    // treat tile calculation the same for all cols
-    if(evenCol) {
-      ycoord -= this.hexHalfHeight;
-      // abort if the gap at the top of the column has been clicked
-      if(ycoord < 0) return null;
-    }
-    var ytile = Math.floor(ycoord / this.hexFullHeight);
-    // get coords within rectangular tile
-    var xintile = xcoord % this.hexTileWidth;
-    var yintile = ycoord % this.hexFullHeight;
-    /* tiles are this shape:
-       -------------
-       |  /        |
-       | /         |
-       |/          |
-       |\          |
-       | \         |
-       |  \        |
-       -------------
-       ^^^^ == the hexSlopeWidth
-    */
-    // are we in main body of tile?
-    if(xintile > this.hexSlopeWidth) return this.getElement(xtile, ytile);
-    if(yintile > this.hexHalfHeight) {
-      // we're in the bottom left corner.  are we below the diagonal?
-      yintile -= this.hexHalfHeight;
-      if(yintile * this.hexSlopeWidth > xintile * this.hexHalfHeight) {
-        xtile--;
-        if(evenCol) ytile++;
-      }
-    } else {
-      // we're in top left corner of tile.  are we above the diagonal?
-      yintile = this.hexHalfHeight - yintile;
-      if(yintile * this.hexSlopeWidth > xintile * this.hexHalfHeight) {
-        xtile--;
-        if(!evenCol) ytile--;
-      }
-    }
-    return this.getElement(xtile, ytile);
   }
 }
 
 var SquareGrid = {
   __proto__: GridBase,
-
-  tileClassPrefix: "square",
-
-  init: function() {
-    this.container = document.getElementById("square-grid");
-  },
 
   setAdjacents: function() {
     const width = this.width, height = this.height;
@@ -456,23 +370,14 @@ var SquareGrid = {
         this.elements[x][y].adjacent = adjacent;
       }
     }
-  },
-
-  getEventTarget: function(e) {
-    const t = e.target;
-    return this.elements[t.x][t.y];
   }
 }
 
 
 
 function Tile(x, y, shape) {
-  const txt = this.txt = document.createElement("label");
-  const img = this.img = document.createElement("image");
-  img.x = txt.x = this.x = x;
-  img.y = txt.y = this.y = y;
-  txt.className = shape+" txt";
-  this.imgClassPrefix = shape+" img ";
+  this.x = x;
+  this.y = y;
   this.adjacent = []; // filled in later
   this.reset();
 }
@@ -483,9 +388,6 @@ Tile.prototype = {
     this.revealed = false;
     this.mines = 0;
     this.number = 0;
-    this.img.hidden = false;
-    this.txt.hidden = true;
-    this.img.className = this.imgClassPrefix + "f0";
   },
 
   addOneFlagOrRemoveAll: function() {
@@ -493,14 +395,14 @@ Tile.prototype = {
     if(f) MineCounters.increase(f);
     f = this.flags = f == Game.maxFlags ? 0 : f + 1;
     if(f) MineCounters.decrease(f);
-    this.img.className = this.imgClassPrefix + "f" + f;
+    view.update(this.x, this.y, "flag", f);
   },
 
   removeOneFlag: function() {
     MineCounters.increase(this.flags);
     var f = --this.flags;
     if(f) MineCounters.decrease(f);
-    this.img.className = this.imgClassPrefix + "f" + f;
+    view.update(this.x, this.y, "flag", f);
   },
 
   onLeftClick: function() {
@@ -526,14 +428,11 @@ Tile.prototype = {
   reveal: function() {
     if(this.mines) {
       Game.lose();
-      this.img.className = this.imgClassPrefix+"e"+this.mines;
+      view.update(this.x, this.y, "explosion", this.mines);
     } else {
       this.revealed = true;
       Game.squaresRevealed++;
-      this.img.hidden = true;
-      if(this.number) this.txt.setAttribute("value", this.number);
-      else this.txt.removeAttribute("value");
-      this.txt.hidden = false;
+      view.update(this.x, this.y, "clear", this.number);
       if(!this.number) this.revealAround();
       Game.checkWon();
     }
@@ -623,25 +522,175 @@ var MineCounters = {
 }
 
 
-
-function onSafeClick(e) {
-  if(e.button==2 || e.ctrlKey) return;
-  const el = Grid.getEventTarget(e);
+function safeFirstClickHandler(event) {
+  if(event.button == 2 || event.ctrlKey) return;
+  if(event.target.minesweeperX === undefined) return
+  const t = event.target, x = t.minesweeperX, y = t.minesweeperY;
+  const el = Grid.elements[x][y];
   if(!el) return;
   while(el.mines) Game._newLikeCurrent();
   Timer.start();
-  Grid.container.onclick = onClick;
+  svgDoc.onclick = mainClickHandler;
   ui.pauseCmd.removeAttribute("disabled");
   el.onLeftClick();
 }
 
-function onClick(e) {
-  if(e.button==2 || e.ctrlKey) return;
-  const el = Grid.getEventTarget(e);
-  if(el) el.onLeftClick();
+function mainClickHandler(event) {
+  if(event.target.minesweeperX === undefined) return;
+  const t = event.target, x = t.minesweeperX, y = t.minesweeperY;
+  const el = Grid.elements[x][y];
+  if(event.button == 2 || event.ctrlKey) {
+    el.onRightClick();
+  } else {
+    el.onLeftClick();
+  }
 }
 
-function onRightClick(e) {
-  const el = Grid.getEventTarget(e);
-  if(el) el. onRightClick();
+
+
+// This code is used within view.svg, which is loaded in an <iframe> in the
+// main XUL file.  It mostly just manipulates <svg:use> elements.
+//
+// Interface for use by main XUL file's javascript is:
+//   init(maximumMineCount)
+//   HexGrid and SquareGrid objects
+
+const SVG = "http://www.w3.org/2000/svg";
+const XLINK = "http://www.w3.org/1999/xlink";
+
+// Parameters of the basic hexagonal path being used.  The dimensions are
+// essentially abitrary.
+const slant_width = 37; // width of the left or right sloping part of the hex
+const body_width = 75;  // width of the rectangular middle part of the hex
+const half_height = 65; // half the height of the hex
+const col_width = slant_width + body_width; // useful in layout
+const half_width = 75; // for text positioning
+const sqr_size = 50; 
+
+
+function init_svg(maximumMineCount) {
+  var defs = svgDoc.getElementById("defs");
+  // maximum numbers visible in a tile (if all adjacent tiles have max. mines)
+  var sqrMaxNum = 8 * maximumMineCount;
+  var hexMaxNum = 6 * maximumMineCount;
+  // create <g><use .../><text>23</text></g> for all needed numbers
+  for(var i = 1; i <= maximumMineCount; ++i) {
+    createTileTemplate("hex", "flag", i, defs);
+    createTileTemplate("sqr", "flag", i, defs);
+  }
+  for(i = 1; i <= hexMaxNum; ++i)
+    createTileTemplate("hex", "clear", i, defs);
+  for(i = 1; i <= sqrMaxNum; ++i)
+    createTileTemplate("sqr", "clear", i, defs);
+}
+
+function createTileTemplate(shapeID, kind, number, defs) {
+  var g = svgDoc.createElementNS(SVG, "g");
+  g.id = shapeID + "-" + kind + "-" + number; // xxx ick!
+  g.appendChild(makeUseElement(shapeID));
+  g.appendChild(textElement(number, half_width, half_height));
+  g.className.baseVal = shapeID + "tile tile " + kind;
+  defs.appendChild(g);
+}
+
+function makeUseElement(id) {
+  var u = svgDoc.createElementNS(SVG, "use");
+//   u.href = "#" + id;
+  u.setAttributeNS(XLINK, "href", "#" + id);
+  return u;
+}
+
+function textElement(str, x, y) {
+  var n = svgDoc.createElementNS(SVG, "text");
+  n.textContent = str;
+  n.setAttribute("x", x);
+  n.setAttribute("y", y);
+  return n;
+}
+
+const view = {
+  _useElements: [],  // list of <svg:use> elements
+  _grid: null,       // 2d array of some of those <svg:use> elements
+  _shape: "foo", // "hex" or "sqr"
+  _width: -1,
+  _height: -1,
+
+  tileShape: null, // set this before calling showGrid (ick!) xxx
+
+  showGrid: function(width, height) {
+    if(this._shape != this.tileShape
+        || this._width != width || this._height != height) {
+      this._shape = this.tileShape;
+      this._width = width;
+      this._height = height;
+      if(this.tileShape == "hex") this._showHexGrid(width, height);
+      else this._showSqrGrid(width, height);
+    }
+    // set all tiles back to unflagged button appearance
+    const us = this._useElements, shape = this._shape, num = width * height;
+    for(var i = 0; i != num; ++i)
+      us[i].setAttributeNS(XLINK, "href", "#" + shape + "-flag-0");
+  },
+
+  _showHexGrid: function(width, height) {
+    const vbWidth = col_width * width + slant_width;
+    const vbHeight = half_height * (height * 2 + 1);
+    this._showGrid(width, height, vbWidth, vbHeight);
+    // build new view
+    for(var x = 0; x != width; ++x) {
+      var dy = x % 2 ? 0 : half_height;
+      for(var y = 0; y != height; ++y)
+        this._redoTile(x,  y, col_width * x, half_height * 2 * y + dy);
+    }
+  },
+
+  _showSqrGrid: function(width, height) {
+    this._showGrid(width, height, width * sqr_size, height * sqr_size);
+    const grid = this._grid;
+    for(var x = 0; x != width; ++x)
+      for(var y = 0; y != height; ++y)
+        this._redoTile(x, y, sqr_size * x, sqr_size * y);
+  },
+
+  _showGrid: function(width, height, viewBoxWidth, viewBoxHeight) {
+    const uses = this._useElements, needed = width * height;
+    // Ensure enough tiles exist
+    for(var i = uses.length; i < needed; ++i) {
+//       dump("creating tile "+i+"\n");
+      var u = uses[i] = svgDoc.createElementNS(SVG, "use");
+      svgDoc.documentElement.appendChild(u);
+    }
+    // Hide superfluous tiles
+    for(i = needed; i < uses.length; ++i) {
+//       dump("hiding tile "+i+"\n");
+      var u = uses[i];
+      u.removeAttributeNS(XLINK, "href");
+      u.setAttribute("x", "-1000");
+      u.setAttribute("y", "-1000");
+    }
+    // Resize viewBox
+    const vb = svgDoc.documentElement.viewBox.baseVal;
+    vb.width = viewBoxWidth;
+    vb.height = viewBoxHeight;
+    // Set up _grid
+    const grid = this._grid = [];
+    for(var x = 0, i = 0; x != width; ++x) {
+      grid[x] = [];
+      for(var y = 0; y != height; ++y, ++i) grid[x][y] = uses[i];
+    }
+  },
+
+  _redoTile: function(x, y, pixelX, pixelY) {
+    const u = this._grid[x][y];
+    u.setAttribute("x", pixelX);
+    u.setAttribute("y", pixelY);
+    u.minesweeperX = x;
+    u.minesweeperY = y;
+  },
+
+  // Update a tile
+  update: function(x, y, string, number) {
+    if(typeof number != "undefined") string += "-" + number;
+    this._grid[x][y].setAttributeNS(XLINK, "href", "#hex-" + string);
+  }
 }

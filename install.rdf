@@ -2,33 +2,25 @@
 
 <r:RDF xmlns:r="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
        xmlns="http://www.mozilla.org/2004/em-rdf#">
+<r:Description about="urn:mozilla:install-manifest">
 
-  <r:Description about="urn:mozilla:install-manifest">
-    <id>minesweeper@clav.mozdev.org</id>
+<id>minesweeper@clav.mozdev.org</id>
 
-    <name>Mines</name>
-    <version>1.0</version>
-    <description>Like Minesweeper, but better</description>
+<name>Mines</name>
+<version>2.0</version>
+<description>Like Minesweeper, but better</description>
+<homepageURL>http://clav.mozdev.org/</homepageURL>
 
-    <creator>Stephen Clavering</creator>
-    <contributor>Percy Cabello (Spanish translator)</contributor>
+<creator>Stephen Clavering</creator>
+<contributor>Percy Cabello (Spanish translator)</contributor>
 
-    <homepageURL>http://clav.mozdev.org/</homepageURL>
+<targetApplication>
+  <r:Description>
+    <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
+    <minVersion>1.5</minVersion>
+    <maxVersion>2.0.0.*</maxVersion>
 
-    <targetApplication>
-      <r:Description>
-        <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
-        <minVersion>1.0</minVersion>
-        <maxVersion>1.0+</maxVersion>
-      </r:Description>
-    </targetApplication>
-
-    <file>
-      <r:Description about="urn:mozilla:extension:file:minesweeper.jar">
-        <package>content/</package>
-        <locale>en/</locale>
-        <locale>es/</locale>
-      </r:Description>
-    </file>
   </r:Description>
+</targetApplication>
+</r:Description>
 </r:RDF>

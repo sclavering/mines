@@ -1,0 +1,2 @@
+zip -ur0 minesweeper.jar content en es -x '*CVS*' -x '*~'
+zip -ur9 minesweeper.xpi minesweeper.jar install.rdf chrome.manifest
