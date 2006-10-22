@@ -100,7 +100,7 @@ function setTileShape(shape) {
   gPrefs.setCharPref("tile-shape", shape);
 
   Game.end();
-  Grid = (shape==HEXAGONAL) ? HexGrid : SquareGrid;
+  Grid.computeAdjacents = (shape==HEXAGONAL) ? hexComputeAdjacents : sqrComputeAdjacents;
   view.tileShape = (shape==HEXAGONAL) ? "hex" : "sqr";
   newGame(gCurrentDifficulty);
 }
@@ -205,9 +205,7 @@ var Game = {
 
 
 
-var Grid = null; // set to one of HexGrid or SquareGrid
-
-var GridBase = {
+const Grid = {
   width: 0,
   height: 0,
 
@@ -216,11 +214,16 @@ var GridBase = {
   // (this is assumed throughout the code).
   elements: [],
 
+  // Set to (sqr|hex)computeAdjacents, which generate an x->y->(co-ord list)
+  // mapping, where co-ords are stored as [x,y] arrays.
+  computeAdjacents: null,
+  adjacents: null,
+
   // create a new mine layout and display it
   newGrid: function(width, height, mines) {
     var x, y;
     // resize the grid if required
-    if(width!=this.width || height!=this.height) {
+    if(width != this.width || height != this.height) {
       this.setSize(width, height);
     } else {
       // clear every element in the grid
@@ -244,8 +247,9 @@ var GridBase = {
         el.mines = i;
         minesPlaced++;
         // increment number for surrounding elements
-        for(var j = 0; j < el.adjacent.length; j++)
-          el.adjacent[j].number += i;
+        var adjs = Grid.adjacents[x][y];
+        for(var j = 0; j != adjs.length; ++j)
+          Grid.getElement2(adjs[j]).number += i;
       }
     }
   },
@@ -260,7 +264,7 @@ var GridBase = {
         this.elements[x][y] = new Tile(x, y);
       }
     }
-    this.setAdjacents();
+    this.adjacents = this.computeAdjacents(width, height);
   },
 
   getElement: function(x, y) {
@@ -268,6 +272,11 @@ var GridBase = {
     if(x>=0 && x<this.width && y>=0 && y<this.height)
       return this.elements[x][y];
     return null;
+  },
+
+    // Argument is an [x,y] pair as an array (i.e. the format used in .adjacents)
+  getElement2: function(coords) {
+    return this.elements[coords[0]][coords[1]];
   },
 
   revealEdges: function() {
@@ -313,72 +322,12 @@ var GridBase = {
   }
 };
 
-var HexGrid = {
-  __proto__: GridBase,
-
-  // give each element a list of those elements adjacent to it
-  setAdjacents: function() {
-    for(var x = 0, even = true; x < this.width; x++, even = !even) {
-      for(var y = 0; y < this.height; y++) {
-        var adjs = [], adj;
-        // up left
-        adj = this.getElement(x - 1, even ? y : y-1);
-        if(adj) adjs.push(adj);
-        // up
-        adj = this.getElement(x, y-1);
-        if(adj) adjs.push(adj);
-        // up right
-        adj = this.getElement(x+1, even ? y : y-1);
-        if(adj) adjs.push(adj);
-        // down right
-        adj = this.getElement(x+1, even ? y+1 : y);
-        if(adj) adjs.push(adj);
-        // down
-        adj = this.getElement(x, y+1);
-        if(adj) adjs.push(adj);
-        // down left
-        adj = this.getElement(x-1, even ? y+1 : y);
-        if(adj) adjs.push(adj);
-        // done
-        this.elements[x][y].adjacent = adjs;
-      }
-    }
-  }
-}
-
-var SquareGrid = {
-  __proto__: GridBase,
-
-  setAdjacents: function() {
-    const width = this.width, height = this.height;
-    const xmax = width - 1, ymax = height - 1;
-    for(var x = 0; x < width; x++) {
-      for(var y = 0; y < height; y++) {
-        var adjacent = [];
-        if(x!=0) {
-          if(y!=ymax) adjacent.push(this.elements[x-1][y+1]);
-          if(y!=0) adjacent.push(this.elements[x-1][y-1]);
-          adjacent.push(this.elements[x-1][y]);
-        }
-        if(x!=xmax) {
-          if(y!=ymax) adjacent.push(this.elements[x+1][y+1]);
-          if(y!=0) adjacent.push(this.elements[x+1][y-1]);
-          adjacent.push(this.elements[x+1][y]);
-        }
-        if(y!=ymax) adjacent.push(this.elements[x][y+1]);
-        if(y!=0) adjacent.push(this.elements[x][y-1]);
-        this.elements[x][y].adjacent = adjacent;
-      }
-    }
-  }
-}
 
 
 
 function Tile(x, y, shape) {
   this.x = x;
   this.y = y;
-  this.adjacent = []; // filled in later
   this.reset();
 }
 
@@ -419,9 +368,9 @@ Tile.prototype = {
   },
 
   hasEnoughSurroundingFlags: function() {
-    const adj = this.adjacent, num = adj.length;
+    const adj = Grid.adjacents[this.x][this.y], num = adj.length;
     var flags = 0;
-    for(var i = 0; i != num; ++i) flags += adj[i].flags;
+    for(var i = 0; i != num; ++i) flags += Grid.getElement2(adj[i]).flags;
     return flags == this.number;
   },
 
@@ -439,14 +388,68 @@ Tile.prototype = {
   },
 
   revealAround: function() {
-    const adj = this.adjacent, num = adj.length;
+    const adj = Grid.adjacents[this.x][this.y], num = adj.length;
     for(var i = 0; i != num; ++i) {
-      var el = adj[i];
-      if(!el.revealed && !el.flags) adj[i].reveal();
+      var el = Grid.getElement2(adj[i]);
+      if(!el.revealed && !el.flags) el.reveal();
     }
   }
 }
 
+
+function hexComputeAdjacents(width, height) {
+  const map = [];
+  for(var x = 0, even = true; x < width; x++, even = !even) {
+    map[x] = [];
+    for(var y = 0; y < height; y++) {
+      var adj = map[x][y] = [];
+      // y co-ord of tile half-above/below this in *adjacent* columns
+      var up = even ? y : y - 1;
+      var down = even ? y + 1 : y;
+      var left = x - 1, right = x + 1;
+      // up left
+      if(x) {
+        if(down < height) adj.push([left, down]);  // down left
+        if(up >= 0) adj.push([left, up]);          // up left
+      }
+      if(y) adj.push([x, y - 1]);                  // *straight* up
+      if(right < width) {
+        if(up >= 0) adj.push([right, up]);         // up right
+        if(down < height) adj.push([right, down]); // down right
+      }
+      if(y + 1 < height) adj.push([x, y + 1]);     // *straight* down
+      dump("adjacent to ("+x+","+y+") are: ");
+      for each(a in map[x][y]) dump("(" + a + ") ");
+      dump("\n");
+    }
+  }
+  return map;
+}
+
+// Compute a x -> y -> coord list mapping to adjacent squares
+function sqrComputeAdjacents(width, height) {
+  const map = [];
+  const xmax = width - 1, ymax = height - 1;
+  for(var x = 0; x < width; x++) {
+    map[x] = [];
+    for(var y = 0; y < height; y++) {
+      var adjacent = map[x][y] = [];
+      if(x != 0) {
+        if(y != ymax) adjacent.push([x - 1, y + 1]);
+        if(y != 0) adjacent.push([x - 1, y - 1]);
+        adjacent.push([x - 1, y]);
+      }
+      if(x != xmax) {
+        if(y != ymax) adjacent.push([x + 1, y + 1]);
+        if(y != 0) adjacent.push([x + 1, y - 1]);
+        adjacent.push([x + 1, y]);
+      }
+      if(y != ymax) adjacent.push([x, y + 1]);
+      if(y != 0) adjacent.push([x, y - 1]);
+    }
+  }
+  return map;
+}
 
 
 var Timer = {
@@ -547,13 +550,6 @@ function mainClickHandler(event) {
 }
 
 
-
-// This code is used within view.svg, which is loaded in an <iframe> in the
-// main XUL file.  It mostly just manipulates <svg:use> elements.
-//
-// Interface for use by main XUL file's javascript is:
-//   init(maximumMineCount)
-//   HexGrid and SquareGrid objects
 
 const SVG = "http://www.w3.org/2000/svg";
 const XLINK = "http://www.w3.org/1999/xlink";
