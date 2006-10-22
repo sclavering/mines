@@ -428,7 +428,7 @@ Tile.prototype = {
   reveal: function() {
     if(this.mines) {
       Game.lose();
-      view.update(this.x, this.y, "explosion", this.mines);
+      view.update(this.x, this.y, "bang", this.mines);
     } else {
       this.revealed = true;
       Game.squaresRevealed++;
@@ -576,7 +576,11 @@ function init_svg(maximumMineCount) {
   // create <g><use .../><text>23</text></g> for all needed numbers
   for(var i = 1; i <= maximumMineCount; ++i) {
     createTileTemplate("hex", "flag", i, defs);
+    createTileTemplate("hex", "mine", i, defs);
+    createTileTemplate("hex", "bang", i, defs);
     createTileTemplate("sqr", "flag", i, defs);
+    createTileTemplate("sqr", "mine", i, defs);
+    createTileTemplate("sqr", "bang", i, defs);
   }
   for(i = 1; i <= hexMaxNum; ++i)
     createTileTemplate("hex", "clear", i, defs);

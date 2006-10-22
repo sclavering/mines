@@ -3,15 +3,24 @@
 
 /* .hex:hover { fill-opacity: 0.1 } */
 
+.shape {
+  stroke-width: 2px;
+}
 .clear .shape {
   stroke: grey;
-  stroke-width: 2px;
   fill: lightgrey;
 }
 .flag .shape {
   stroke: black;
-  stroke-width: 2px;
   fill: darkgrey;
+}
+.mine .shape {
+  stroke: black;
+  fill: orange;
+}
+.bang .shape {
+  stroke: grey;
+  fill: red;
 }
 
 .hextile text {
@@ -19,5 +28,4 @@
   /* have the co-ords of the element refer to the h- and v-centre of the text */
   text-anchor: middle;
   dominant-baseline: middle;
-  stroke: purple;
 }
