@@ -257,14 +257,7 @@ const Grid = {
     }
   },
 
-  getElement: function(x, y) {
-    // bounds checked because it's useful to the callers
-    if(x>=0 && x<this.width && y>=0 && y<this.height)
-      return this.elements[x][y];
-    return null;
-  },
-
-    // Argument is an [x,y] pair as an array (i.e. the format used in .adjacents)
+  // Argument is an [x,y] pair as an array (i.e. the format used in .adjacents)
   getElement2: function(coords) {
     return this.elements[coords[0]][coords[1]];
   },
@@ -321,7 +314,12 @@ const Grid = {
   tileClicked: function(x, y, isRightClick) {
     const tile = this.elements[x][y];
     if(tile.revealed) {
-      if(this.hasEnoughSurroundingFlags(tile)) this.revealAround(tile);
+      // Reveal surrounding unflagged tiles if there is the correct number of
+      // flags in the surrounding tiles.  (They may be in the wrong place...)
+      const adj = Grid.adjacents[tile.x][tile.y], num = adj.length;
+      var flags = 0;
+      for(var i = 0; i != num; ++i) flags += Grid.getElement2(adj[i]).flags;
+      if(flags == tile.number) this.revealAround(tile);
     } else if(isRightClick) {
       // Add a flag or remove them all
       this.adjustFlags(tile, tile.flags == Game.maxFlags ? 0 : tile.flags + 1);
@@ -330,13 +328,6 @@ const Grid = {
     } else {
       this.reveal(tile);
     }
-  },
-
-  hasEnoughSurroundingFlags: function(tile) {
-    const adj = Grid.adjacents[tile.x][tile.y], num = adj.length;
-    var flags = 0;
-    for(var i = 0; i != num; ++i) flags += Grid.getElement2(adj[i]).flags;
-    return flags == tile.number;
   },
 
   reveal: function(tile) {
