@@ -311,32 +311,25 @@ const Grid = {
     MineCounters.resetAll();
   },
 
-  addOneFlagOrRemoveAll: function(tile) {
-    var f = tile.flags;
-    if(f) MineCounters.increase(f);
-    f = tile.flags = f == Game.maxFlags ? 0 : f + 1;
-    if(f) MineCounters.decrease(f);
-    view.update(tile, "flag", f);
-  },
-
-  removeOneFlag: function(tile) {
+  adjustFlags: function(tile, num) {
     MineCounters.increase(tile.flags);
-    var f = --tile.flags;
-    if(f) MineCounters.decrease(f);
-    view.update(tile, "flag", f);
+    MineCounters.decrease(num);
+    tile.flags = num;
+    view.update(tile, "flag", num);
   },
 
-  onLeftClick: function(tile) {
-    if(tile.flags) this.removeOneFlag(tile);
-    else if(!tile.revealed) this.reveal(tile);
-    else if(this.hasEnoughSurroundingFlags(tile)) this.revealAround(tile);
-  },
-
-  onRightClick: function(tile) {
-    // this happens on right click (as well as left click) so that it still works for
-    // click-with-both-buttons
-    if(!tile.revealed) this.addOneFlagOrRemoveAll(tile);
-    else if(this.hasEnoughSurroundingFlags(tile)) this.revealAround(tile);
+  tileClicked: function(x, y, isRightClick) {
+    const tile = this.elements[x][y];
+    if(tile.revealed) {
+      if(this.hasEnoughSurroundingFlags(tile)) this.revealAround(tile);
+    } else if(isRightClick) {
+      // Add a flag or remove them all
+      this.adjustFlags(tile, tile.flags == Game.maxFlags ? 0 : tile.flags + 1);
+    } else if(tile.flags) {
+      this.adjustFlags(tile, tile.flags - 1);
+    } else {
+      this.reveal(tile);
+    }
   },
 
   hasEnoughSurroundingFlags: function(tile) {
@@ -466,39 +459,37 @@ var Timer = {
 
 var MineCounters = {
   values: [],
-  containers: [],
-  displays: [],
+  // These hold a dummy object for the non-existent 0-mines counter
+  containers: [{}],
+  displays: [{}],
 
   init: function() {
     var i = 0;
-    var elt = document.getElementById("mine-counter-0");
-    while(elt) {
+    while(true) {
+      var elt = document.getElementById("mine-counter-" + i++);
+      if(!elt) break;
       this.displays.push(elt);
       this.containers.push(elt.parentNode);
-      elt = document.getElementById("mine-counter-"+(++i));
     }
   },
 
-  increase: function(counter) {
-    var c = counter - 1; // arrays are 0-based, but we have no 0 counter
+  increase: function(c) {
     this.values[c]++;
     this.displays[c].value = this.values[c];
   },
-  decrease: function(counter) {
-    var c = counter - 1;
+  decrease: function(c) {
     this.values[c]--;
     this.displays[c].value = this.values[c];
   },
 
   resetAll: function() {
-    for(var i = 0; i < this.values.length; i++) this.displays[i].value = 0;
+    for(var i = 0; i != this.values.length; i++) this.displays[i].value = 0;
   },
   setAll: function(newvals) {
-    // we *do* have to copy the array
-    const vals = this.values = newvals.slice(0), num = vals.length;
-    const ds = this.displays, cs = this.containers;
+    const vals = this.values = [0].concat(newvals);
+    const num = vals.length, ds = this.displays, cs = this.containers;
     for(var i = 0; i != num; i++) {
-      ds[i].value = newvals[i];
+      ds[i].value = vals[i];
       cs[i].collapsed = false;
     }
     // hide unwanted counters
@@ -517,18 +508,13 @@ function safeFirstClickHandler(event) {
   Timer.start();
   svgDoc.onclick = mainClickHandler;
   ui.pauseCmd.removeAttribute("disabled");
-  Grid.onLeftClick(el);
+  Grid.tileClicked(x, y, false);
 }
 
 function mainClickHandler(event) {
   if(event.target.minesweeperX === undefined) return;
   const t = event.target, x = t.minesweeperX, y = t.minesweeperY;
-  const el = Grid.elements[x][y];
-  if(event.button == 2 || event.ctrlKey) {
-    Grid.onRightClick(el);
-  } else {
-    Grid.onLeftClick(el);
-  }
+  Grid.tileClicked(x, y, event.button == 2 || event.ctrlKey);
 }
 
 
