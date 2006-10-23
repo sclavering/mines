@@ -24,9 +24,9 @@
     <toolbarbutton id="pause-button" command="cmd-pause" label="&pause;"/>
     <toolbarbutton id="settings-button" type="menu" label="&settings;">
       <menupopup>
-        <menuitem type="radio" id="dif-0" name="difficulty" label="&beginner;" oncommand="newGame(0);"/>
-        <menuitem type="radio" id="dif-1" name="difficulty" label="&intermediate;" oncommand="newGame(1);"/>
-        <menuitem type="radio" id="dif-2" name="difficulty" label="&expert;" oncommand="newGame(2);"/>
+        <menuitem type="radio" id="dif-0" name="dif" label="&beginner;" oncommand="setDifficulty(0);"/>
+        <menuitem type="radio" id="dif-1" name="dif" label="&intermediate;" oncommand="setDifficulty(1);"/>
+        <menuitem type="radio" id="dif-2" name="dif" label="&expert;" oncommand="setDifficulty(2);"/>
         <menuseparator/>
         <menuitem type="radio" id="shape-square" name="shape" label="&squaretiles;" oncommand="newSquareGame();"/>
         <menuitem type="radio" id="shape-hex"    name="shape" label="&hextiles;" oncommand="newHexagonalGame();"/>
