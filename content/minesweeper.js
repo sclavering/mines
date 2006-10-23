@@ -166,6 +166,7 @@ var Game = {
     ui.smileyFace.setFace("normal");
     view.showGrid(this.width, this.height);
     if(gNoMinesAtEdges) {
+      Grid.fillGrid()
       Grid.revealEdges();
       svgDoc.onclick = mainClickHandler;
       ui.pauseCmd.removeAttribute("disabled");
@@ -222,6 +223,7 @@ const Grid = {
   // create a new mine layout and display it
   newGrid: function(width, height, mines) {
     var x, y;
+    this.mines = mines;
     // Resize the grid if required
     if(width != this.width || height != this.height) {
       this.width = width;
@@ -234,7 +236,11 @@ const Grid = {
     for(x = 0; x != width; ++x)
       for(y = 0; y != height; ++y)
         this.elements[x][y] = new Tile(x, y);
+  },
 
+  fillGrid: function() {
+    const width = this.width, height = this.height, mines = this.mines;
+    const elements = this.elements, adjacents = this.adjacents;
     const maxx = width - 1, maxy = height - 1;
     // create the required number of mines, and set the number for other elements
     for(var i = 1; i <= mines.length; i++) {
@@ -244,15 +250,15 @@ const Grid = {
         do { y = Math.random(); } while(y == 1.0);
         x = Math.floor(x * width);
         y = Math.floor(y * height);
-        var el = this.elements[x][y];
+        var el = elements[x][y];
         if(el.mines) continue;
         if(gNoMinesAtEdges && (!x || x==maxx || !y || y==maxy)) continue;
         el.mines = i;
         minesPlaced++;
         // increment number for surrounding elements
-        var adjs = Grid.adjacents[x][y];
+        var adjs = adjacents[x][y];
         for(var j = 0; j != adjs.length; ++j)
-          Grid.getElement2(adjs[j]).number += i;
+          this.getElement2(adjs[j]).number += i;
       }
     }
   },
@@ -495,7 +501,10 @@ function safeFirstClickHandler(event) {
   const t = event.target, x = t.minesweeperX, y = t.minesweeperY;
   const el = Grid.elements[x][y];
   if(!el) return;
-  while(el.mines) Game._newLikeCurrent();
+  // Setting .mines prevents fillGrid() from putting a mine there
+  el.mines = 1000;
+  Grid.fillGrid();
+  el.mines = 0;
   Timer.start();
   svgDoc.onclick = mainClickHandler;
   ui.pauseCmd.removeAttribute("disabled");
