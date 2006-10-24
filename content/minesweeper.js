@@ -1,5 +1,5 @@
 const HEXAGONAL = "hex";
-const SQUARE = "square";
+const SQUARE = "sqr";
 
 const kWidths = [9,16,30];
 const kHeights = [9,16,16];
@@ -53,7 +53,11 @@ window.onload = function() {
   document.getElementById("dif-"+gCurrentDifficulty).setAttribute("checked","true");
 
   // restore tile shape
-  try { gTileShape = gPrefs.getCharPref("tile-shape"); } catch(e) {}
+  try {
+    gTileShape = gPrefs.getCharPref("tile-shape");
+    // to account for "square" (the old version of "sqr");
+    if(!(gTileShape in computeAdjacents)) gTileShape = SQUARE;
+  } catch(e) {}
   document.getElementById("shape-"+gTileShape).setAttribute("checked","true");
 
   // restore mines-per-tile
@@ -200,6 +204,7 @@ Game.prototype = {
     for(var i = 1; i <= mines.length; i++) {
       var minesPlaced = 0;
       while(minesPlaced != mines[i-1]) {
+        var x, y;
         do { x = Math.random(); } while(x == 1.0);
         do { y = Math.random(); } while(y == 1.0);
         x = Math.floor(x * width);
@@ -484,7 +489,8 @@ const body_width = 75;  // width of the rectangular middle part of the hex
 const half_height = 65; // half the height of the hex
 const col_width = slant_width + body_width; // useful in layout
 const half_width = 75; // for text positioning
-const sqr_size = 50; 
+const sqr_size = 50;
+const half_square = 25;
 
 
 function init_svg(maximumMineCount) {
@@ -494,24 +500,24 @@ function init_svg(maximumMineCount) {
   var hexMaxNum = 6 * maximumMineCount;
   // create <g><use .../><text>23</text></g> for all needed numbers
   for(var i = 1; i <= maximumMineCount; ++i) {
-    createTileTemplate("hex", "flag", i, defs);
-    createTileTemplate("hex", "mine", i, defs);
-    createTileTemplate("hex", "bang", i, defs);
-    createTileTemplate("sqr", "flag", i, defs);
-    createTileTemplate("sqr", "mine", i, defs);
-    createTileTemplate("sqr", "bang", i, defs);
+    createTileTemplate("hex", "flag", i, half_width, half_height, defs);
+    createTileTemplate("hex", "mine", i, half_width, half_height, defs);
+    createTileTemplate("hex", "bang", i, half_width, half_height, defs);
+    createTileTemplate("sqr", "flag", i, half_square, half_square, defs);
+    createTileTemplate("sqr", "mine", i, half_square, half_square, defs);
+    createTileTemplate("sqr", "bang", i, half_square, half_square, defs);
   }
   for(i = 1; i <= hexMaxNum; ++i)
-    createTileTemplate("hex", "clear", i, defs);
+    createTileTemplate("hex", "clear", i, half_width, half_height, defs);
   for(i = 1; i <= sqrMaxNum; ++i)
-    createTileTemplate("sqr", "clear", i, defs);
+    createTileTemplate("sqr", "clear", i, half_square, half_square, defs);
 }
 
-function createTileTemplate(shapeID, kind, number, defs) {
+function createTileTemplate(shapeID, kind, number, textX, textY, defs) {
   var g = svgDoc.createElementNS(SVG, "g");
   g.id = shapeID + "-" + kind + "-" + number; // xxx ick!
   g.appendChild(makeUseElement(shapeID));
-  g.appendChild(textElement(number, half_width, half_height));
+  g.appendChild(textElement(number, textX, textY));
   g.className.baseVal = shapeID + "tile tile " + kind;
   defs.appendChild(g);
 }
@@ -611,6 +617,7 @@ const view = {
   // Update a tile
   update: function(tile, string, number) {
     if(typeof number != "undefined") string += "-" + number;
-    this._grid[tile.x][tile.y].setAttributeNS(XLINK, "href", "#hex-" + string);
+    const href = "#" + this._shape + "-" + string;
+    this._grid[tile.x][tile.y].setAttributeNS(XLINK, "href", href);
   }
 }

@@ -28,8 +28,8 @@
         <menuitem type="radio" id="dif-1" name="dif" label="&intermediate;" oncommand="setDifficulty(1);"/>
         <menuitem type="radio" id="dif-2" name="dif" label="&expert;" oncommand="setDifficulty(2);"/>
         <menuseparator/>
-        <menuitem type="radio" id="shape-square" name="shape" label="&squaretiles;" oncommand="newSquareGame();"/>
-        <menuitem type="radio" id="shape-hex"    name="shape" label="&hextiles;" oncommand="newHexagonalGame();"/>
+        <menuitem type="radio" id="shape-sqr" name="shape" label="&squaretiles;" oncommand="newSquareGame();"/>
+        <menuitem type="radio" id="shape-hex" name="shape" label="&hextiles;" oncommand="newHexagonalGame();"/>
         <menuseparator/>
         <menu label="&minespertile;" oncommand="setMinesPerTile(event.target.getAttribute('value'));">
           <menupopup id="minespertile-popup">
@@ -46,6 +46,7 @@
         <menuitem type="checkbox" id="nominesatedges" label="&nominesatedges;" oncommand="toggleNoMinesAtEdges(this);"/>
       </menupopup>
     </toolbarbutton>
+    <toolbarbutton label="!" oncommand="openDialog('chrome://global/content/console.xul');"/>
   </toolbar>
 </toolbox>
 

@@ -25,7 +25,14 @@
 
 .hextile text {
   font-size: 70px;
+}
+
+.tile text {
   /* have the co-ords of the element refer to the h- and v-centre of the text */
   text-anchor: middle;
   dominant-baseline: middle;
+}
+
+.sqrtile text {
+  font-size: 30px;
 }

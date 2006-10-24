@@ -10,7 +10,7 @@
     >
   <defs id="defs">
     <path id="hex" class="shape hex" d="M 112,0 L 37,0 L 0,65 L 37,130 L 112,130 L 149,65 z"/>
-    <path id="sqr" class="shape sqr" d="L 50,0 50,50 0,50 z"/>
+    <path id="sqr" class="shape sqr" d="M 0,0 L 50,0 50,50 0,50 z"/>
     <!-- Tiles with zero flags, in button mode -->
     <g id="sqr-flag-0" class="tile sqrtile flag"><use xl:href="#sqr"/></g>
     <g id="hex-flag-0" class="tile hextile flag"><use xl:href="#hex"/></g>
