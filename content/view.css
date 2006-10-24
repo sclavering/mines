@@ -4,7 +4,7 @@
 /* .hex:hover { fill-opacity: 0.1 } */
 
 .shape {
-  stroke-width: 2px;
+  stroke-width: 1px;
 }
 .clear .shape {
   stroke: grey;
@@ -23,6 +23,10 @@
   fill: red;
 }
 
+.flag text, .clear text {
+  fill: currentColor;
+}
+
 .hextile text {
   font-size: 70px;
 }
@@ -36,3 +40,12 @@
 .sqrtile text {
   font-size: 30px;
 }
+
+.n1 { color: blue; }
+.n2 { color: #008400; }
+.n3 { color: red; }
+.n4 { color: #000084; }
+.n5 { color: #840000; }
+.n6 { color: #008484; }
+.n7 { color: #840084; }
+

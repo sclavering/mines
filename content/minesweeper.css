@@ -49,9 +49,6 @@ colours for buttons:
 
 .faded { opacity: 0.6; }
 
-.img { list-style-image: url(images.png); }
-
-.cross { -moz-image-region: rect(42px 70px 56px 56px); }
 .f0 { list-style-image: none; }
 .f1 { -moz-image-region: rect(0 14px 14px 0); }
 .f2 { -moz-image-region: rect(0 28px 14px 14px); }
@@ -60,72 +57,3 @@ colours for buttons:
 .f5 { -moz-image-region: rect(0 70px 14px 56px); }
 .f6 { -moz-image-region: rect(0 84px 14px 70px); }
 .f7 { -moz-image-region: rect(0 98px 14px 84px); }
-.m1 { -moz-image-region: rect(14px 14px 28px 0); }
-.m2 { -moz-image-region: rect(14px 28px 28px 14px); }
-.m3 { -moz-image-region: rect(14px 42px 28px 28px); }
-.m4 { -moz-image-region: rect(14px 56px 28px 42px); }
-.m5 { -moz-image-region: rect(14px 70px 28px 56px); }
-.m6 { -moz-image-region: rect(14px 84px 28px 70px); }
-.m7 { -moz-image-region: rect(14px 98px 28px 84px); }
-.e1 { -moz-image-region: rect(28px 14px 42px 0); }
-.e2 { -moz-image-region: rect(28px 28px 42px 14px); }
-.e3 { -moz-image-region: rect(28px 42px 42px 28px); }
-.e4 { -moz-image-region: rect(28px 56px 42px 42px); }
-.e5 { -moz-image-region: rect(28px 70px 42px 56px); }
-.e6 { -moz-image-region: rect(28px 84px 42px 70px); }
-.e7 { -moz-image-region: rect(28px 98px 42px 84px); }
-
-.txt[value="1"] { color: blue; }
-.txt[value="2"] { color: #008400; }
-.txt[value="3"] { color: red; }
-.txt[value="4"] { color: #000084; }
-.txt[value="5"] { color: #840000; }
-.txt[value="6"] { color: #008484; }
-.txt[value="7"] { color: #840084; }
-
-.txt[value="1"], .txt[value="2"], .txt[value="3"],
-.txt[value="4"], .txt[value="5"], .txt[value="6"],
-.txt[value="7"], .txt[value="8"], .txt[value="9"] {
-  font-weight: bold;
-}
-
-.txt {
-  text-align: center;
-  font-size: 14px;
-  vertical-align: middle;
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
-}
-
-.square {
-  width: 18px;
-  height: 18px;
-  -moz-box-sizing: border-box;
-}
-
-.square.img {
-  background: #ebe8d8;
-  border: 2px solid;
-  -moz-border-top-colors: #fefefe #f0eee1;
-  -moz-border-left-colors: #fefefe #f0eee1;
-  -moz-border-right-colors: #716f64 #aba798;
-  -moz-border-bottom-colors: #716f64 #aba798;
-}
-
-.hex {
-  width: 22px;
-  height: 20px;
-}
-
-.hex.img {
-  background: url(hex.png);
-  padding: 3px 4px; /* so the image occupies 14px * 14px */
-}
-
-/* hex column styles for correct alignment */
-#hex-grid > vbox.evencolumn { margin-top: 10px; }
-#hex-grid > vbox { margin-left: -5px; }
-/* force the left-most column back into the #hex-grid box.
-   cannot use padding on #hex-grid because it breaks <box>.boxObject.x etc */
-#hex-grid > :first-child { margin-left: 0; }

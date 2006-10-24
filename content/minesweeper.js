@@ -518,7 +518,7 @@ function createTileTemplate(shapeID, kind, number, textX, textY, defs) {
   g.id = shapeID + "-" + kind + "-" + number; // xxx ick!
   g.appendChild(makeUseElement(shapeID));
   g.appendChild(textElement(number, textX, textY));
-  g.className.baseVal = shapeID + "tile tile " + kind;
+  g.className.baseVal = shapeID + "tile tile " + kind + " n" + number;
   defs.appendChild(g);
 }
 
