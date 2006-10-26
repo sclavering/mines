@@ -33,6 +33,7 @@ const ui = {
 var svgDoc = null;
 var svgWin = null;
 
+var view = null; // views.hex or views.sqr
 var game = null; // a Game object
 var previousGame = null;
 var paused = false;
@@ -66,7 +67,8 @@ window.onload = function() {
 
   svgWin = ui.svgFrame.contentWindow;
   svgDoc = svgWin.document;
-  init_svg(7); // we allow 7 mines in a square
+  views.hex.init();
+  views.sqr.init();
 
   Timer.init();
   MineCounters.init();
@@ -136,7 +138,9 @@ function newGame() {
   Timer.reset();
   ui.pauseMsg.hidden = true;
   ui.smileyFace.setFace("normal");
-  view.showGrid(shape, width, height);
+  oldview = view;
+  view = views[gTileShape];
+  view.showGrid(width, height);
   if(gNoMinesAtEdges) {
     game.fillGrid()
     game.revealEdges();
@@ -351,9 +355,6 @@ computeAdjacents.hex = function(width, height) {
         if(down < height) adj.push([right, down]); // down right
       }
       if(y + 1 < height) adj.push([x, y + 1]);     // *straight* down
-//       dump("adjacent to ("+x+","+y+") are: ");
-//       for each(a in map[x][y]) dump("(" + a + ") ");
-//       dump("\n");
     }
   }
   return map;
@@ -492,132 +493,112 @@ const half_width = 75; // for text positioning
 const sqr_size = 50;
 const half_square = 25;
 
+const _view = {
+  _shape: "",
+  _grid: [],    // An [x][y] array of <svg:g> elements use for the tiles' views
+  _panel: null, // An <svg:g> used to hide the grid as a whole
+  _tile: null,  // A template <svg:g> tile, for cloning
+  // Last dimensions, to save on needless resizing
+  _width: 0,
+  _height: 0,
 
-function init_svg(maximumMineCount) {
-  var defs = svgDoc.getElementById("defs");
-  // maximum numbers visible in a tile (if all adjacent tiles have max. mines)
-  var sqrMaxNum = 8 * maximumMineCount;
-  var hexMaxNum = 6 * maximumMineCount;
-  // create <g><use .../><text>23</text></g> for all needed numbers
-  for(var i = 1; i <= maximumMineCount; ++i) {
-    createTileTemplate("hex", "flag", i, half_width, half_height, defs);
-    createTileTemplate("hex", "mine", i, half_width, half_height, defs);
-    createTileTemplate("hex", "bang", i, half_width, half_height, defs);
-    createTileTemplate("sqr", "flag", i, half_square, half_square, defs);
-    createTileTemplate("sqr", "mine", i, half_square, half_square, defs);
-    createTileTemplate("sqr", "bang", i, half_square, half_square, defs);
-  }
-  for(i = 1; i <= hexMaxNum; ++i)
-    createTileTemplate("hex", "clear", i, half_width, half_height, defs);
-  for(i = 1; i <= sqrMaxNum; ++i)
-    createTileTemplate("sqr", "clear", i, half_square, half_square, defs);
-}
-
-function createTileTemplate(shapeID, kind, number, textX, textY, defs) {
-  var g = svgDoc.createElementNS(SVG, "g");
-  g.id = shapeID + "-" + kind + "-" + number; // xxx ick!
-  g.appendChild(makeUseElement(shapeID));
-  g.appendChild(textElement(number, textX, textY));
-  g.className.baseVal = shapeID + "tile tile " + kind + " n" + number;
-  defs.appendChild(g);
-}
-
-function makeUseElement(id) {
-  var u = svgDoc.createElementNS(SVG, "use");
-//   u.href = "#" + id;
-  u.setAttributeNS(XLINK, "href", "#" + id);
-  return u;
-}
-
-function textElement(str, x, y) {
-  var n = svgDoc.createElementNS(SVG, "text");
-  n.textContent = str;
-  n.setAttribute("x", x);
-  n.setAttribute("y", y);
-  return n;
-}
-
-const view = {
-  _useElements: [],  // list of <svg:use> elements
-  _grid: null,       // 2d array of some of those <svg:use> elements
-  _shape: null,      // "hex" or "sqr"
-  _width: -1,
-  _height: -1,
-
-  showGrid: function(shape, width, height) {
-    if(shape != this._shape || this._width != width || this._height != height) {
-      this._shape = shape;
-      this._width = width;
-      this._height = height;
-      if(shape == "hex") this._showHexGrid(width, height);
-      else this._showSqrGrid(width, height);
-    }
-    // set all tiles back to unflagged button appearance
-    const us = this._useElements, num = width * height;
-    const href = "#" + shape + "-flag-0";
-    for(var i = 0; i != num; ++i) us[i].setAttributeNS(XLINK, "href", href);
+  init: function() {
+    const shape = svgDoc.getElementById(this._shape);
+    shape.id = "";
+    const tile = this._tile = svgDoc.createElementNS(SVG, "g");
+    tile.appendChild(shape);
+    const text = svgDoc.createElementNS(SVG, "text");
+    text.setAttribute("x", this._textPosition[0]);
+    text.setAttribute("y", this._textPosition[1]);
+    text.appendChild(svgDoc.createTextNode(""));
+    tile.appendChild(text);
+    this._panel = svgDoc.getElementById(this._shape + "grid");
+    this._grid = [];
   },
 
-  _showHexGrid: function(width, height) {
-    const vbWidth = col_width * width + slant_width;
-    const vbHeight = half_height * (height * 2 + 1);
-    this._showGrid(width, height, vbWidth, vbHeight);
-    // build new view
-    for(var x = 0; x != width; ++x) {
-      var dy = x % 2 ? 0 : half_height;
-      for(var y = 0; y != height; ++y)
-        this._redoTile(x, y, col_width * x, half_height * 2 * y + dy);
-    }
+  hide: function() {
+    this._panel.className.baseVal = "hidden";
   },
 
-  _showSqrGrid: function(width, height) {
-    this._showGrid(width, height, width * sqr_size, height * sqr_size);
+  showGrid: function(width, height) {
+    if(this != oldview) {
+      if(oldview) oldview.hide();
+      this._panel.className.baseVal = "";
+      this._resizeViewBox();
+    }
+    if(width != this._width || height != this._height)
+      this._resizeGrid(width, height);
     const grid = this._grid;
-    for(var x = 0; x != width; ++x)
-      for(var y = 0; y != height; ++y)
-        this._redoTile(x, y, sqr_size * x, sqr_size * y);
-  },
-
-  _showGrid: function(width, height, viewBoxWidth, viewBoxHeight) {
-    const uses = this._useElements, needed = width * height;
-    // Ensure enough tiles exist
-    for(var i = uses.length; i < needed; ++i) {
-//       dump("creating tile "+i+"\n");
-      var u = uses[i] = svgDoc.createElementNS(SVG, "use");
-      svgDoc.documentElement.appendChild(u);
-    }
-    // Hide superfluous tiles
-    for(i = needed; i < uses.length; ++i) {
-//       dump("hiding tile "+i+"\n");
-      var u = uses[i];
-      u.removeAttributeNS(XLINK, "href");
-      u.setAttribute("x", "-1000");
-      u.setAttribute("y", "-1000");
-    }
-    // Resize viewBox
-    const vb = svgDoc.documentElement.viewBox.baseVal;
-    vb.width = viewBoxWidth;
-    vb.height = viewBoxHeight;
-    // Set up _grid
-    const grid = this._grid = [];
-    for(var x = 0, i = 0; x != width; ++x) {
-      grid[x] = [];
-      for(var y = 0; y != height; ++y, ++i) grid[x][y] = uses[i];
+    const str = this._shape + " tile flag n0"; // see this.update
+    for(var x = 0; x != width; ++x) {
+      for(var y = 0; y != height; ++y) {
+        grid[x][y].className.baseVal = str;
+        grid[x][y]._text.data = "";
+      }
     }
   },
 
-  _redoTile: function(x, y, pixelX, pixelY) {
-    const u = this._grid[x][y];
-    u.setAttribute("x", pixelX);
-    u.setAttribute("y", pixelY);
-    u.minesweeperX = x;
-    u.minesweeperY = y;
-  },
-
-  // Update a tile
   update: function(tile, string, number) {
-    if(typeof number != "undefined") string += "-" + number;
-    const href = "#" + this._shape + "-" + string;
-    this._grid[tile.x][tile.y].setAttributeNS(XLINK, "href", href);
+    const t = this._grid[tile.x][tile.y];
+    number = number || ""; // hides 0, and ignores missing arguments
+    t.className.baseVal = this._shape + " tile " + string + " n" + number;
+    t._text.data = number;
+  },
+
+  _resizeGrid: function(width, height) {
+    this._width = width; this._height = height;
+    const grid = this._grid, tile = this._tile, panel = this._panel;
+    // Create new tiles and hide existing ones as required
+    for(var x = 0; x < width; ++x) {
+      var col = grid[x] || (grid[x] = []);
+      for(var y = col.length; y < height; ++y) {
+        var t = col[y] = panel.appendChild(this._tile.cloneNode(true));
+        t._text = t.lastChild.firstChild; // The cloned Text Node
+        var pos = this._tilePosition(x, y);
+        // xxx use the DOM?  probably even uglier than this though
+        t.setAttribute("transform", "translate("+pos[0]+","+pos[1]+")");
+        var shape = t.firstChild;
+        shape.minesweeperX = x;
+        shape.minesweeperY = y;
+      }
+      for(y = height; y < col.length; ++y)
+        col[y].className.baseVal = "hidden";
+    }
+    for(x = width; x < grid.length; ++x)
+      for(y = 0; y != grid[x].length; ++y)
+        grid[x][y].className.baseVal = "hidden";
+    this._resizeViewBox();
+  },
+
+  _resizeViewBox: function() {
+    const vb = svgDoc.documentElement.viewBox.baseVal;
+    [vb.width, vb.height] = this._viewBoxSize();
   }
-}
+};
+
+const views = {};
+views.hex = {
+  __proto__: _view,
+  _shape: "hex",
+  _textPosition: [half_width, half_height],
+  _viewBoxSize: function() {
+    const vbWidth = col_width * this._width + slant_width;
+    const vbHeight = half_height * (this._height * 2 + 1);
+    return [vbWidth, vbHeight]
+  },
+  _tilePosition: function(x, y) {
+    const dy = 1 - x % 2; // add a half_height to y in even columns
+    return [col_width * x, half_height * (2 * y + dy)];
+  }
+};
+views.sqr = {
+  __proto__: _view,
+  _shape: "sqr",
+  _textPosition: [half_square, half_square],
+  _viewBoxSize: function() {
+    return [this._width * sqr_size, this._height * sqr_size];
+  },
+  _tilePosition: function(x, y) {
+    return [x * sqr_size, y * sqr_size];
+  }
+};

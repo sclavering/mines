@@ -1,7 +1,11 @@
-/* * { stroke: black; stroke-width: 4px; fill-rule: evenodd; } */
-/* text { stroke: none } */
+/* Ensure the squares or hexes get the events, not the text on them */
+text {
+  pointer-events: none;
+}
 
-/* .hex:hover { fill-opacity: 0.1 } */
+.hidden {
+  display:none
+}
 
 .shape {
   stroke-width: 1px;
@@ -27,7 +31,7 @@
   fill: currentColor;
 }
 
-.hextile text {
+.hex text {
   font-size: 70px;
 }
 
@@ -37,7 +41,7 @@
   dominant-baseline: middle;
 }
 
-.sqrtile text {
+.sqr text {
   font-size: 30px;
 }
 
