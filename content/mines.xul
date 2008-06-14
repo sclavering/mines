@@ -1,17 +1,17 @@
 <?xml version="1.0"?>
 
-<?xml-stylesheet href="minesweeper.css" type="text/css"?>
+<?xml-stylesheet href="mines.css" type="text/css"?>
 
-<!DOCTYPE window SYSTEM "chrome://minesweeper/locale/minesweeper.dtd">
+<!DOCTYPE window SYSTEM "chrome://mines/locale/mines.dtd">
 
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-  windowtype="minesweeper"
-  id="minesweeper-window2"
+  windowtype="mines"
+  id="mines-window2"
   title="&Minesweeper;"
   persist="screenX screenY width height"
   >
 
-<script type="application/x-javascript" src="minesweeper.js"/>
+<script type="application/x-javascript" src="mines.js"/>
 
 <commandset id="commands">
   <command id="cmd-new" oncommand="newGame();"/>
