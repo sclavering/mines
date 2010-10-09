@@ -2,8 +2,6 @@
 <?xml-stylesheet href="view.css" type="text/css"?>
 
 <svg xmlns="http://www.w3.org/2000/svg"
-    xmlns:svg="http://www.w3.org/2000/svg"
-    xmlns:xl="http://www.w3.org/1999/xlink"
     version="1.0"
     viewBox="0 0 1000 1000"
     preserveAspectRatio="xMidYMid meet"
