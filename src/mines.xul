@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 
 <?xml-stylesheet href="mines.css" type="text/css"?>
+<?xml-stylesheet href="view.css" type="text/css"?>
 
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
   xmlns:html="http://www.w3.org/1999/xhtml"
@@ -47,31 +48,31 @@
     <label id="timer"/>
 
     <hbox align="center">
-      <image class="f1 counter-icon"/>
+      <label class="n1" value="1⚑"/>
       <label id="mine-counter-0"/>
     </hbox>
     <hbox align="center">
-      <image class="f2 counter-icon"/>
+      <label class="n2" value="2⚑"/>
       <label id="mine-counter-1"/>
     </hbox>
     <hbox align="center">
-      <image class="f3 counter-icon"/>
+      <label class="n3" value="3⚑"/>
       <label id="mine-counter-2"/>
     </hbox>
     <hbox align="center">
-      <image class="f4 counter-icon"/>
+      <label class="n4" value="4⚑"/>
       <label id="mine-counter-3"/>
     </hbox>
     <hbox align="center">
-      <image class="f5 counter-icon"/>
+      <label class="n5" value="5⚑"/>
       <label id="mine-counter-4"/>
     </hbox>
     <hbox align="center">
-      <image class="f6 counter-icon"/>
+      <label class="n6" value="6⚑"/>
       <label id="mine-counter-5"/>
     </hbox>
     <hbox align="center">
-      <image class="f7 counter-icon"/>
+      <label class="n7" value="7⚑"/>
       <label id="mine-counter-6"/>
     </hbox>
   </vbox>

@@ -36,11 +36,6 @@ colours for buttons:
 #timer {
   width: 3.5ex;
 }
-.counter-icon {
-  list-style-image: url(images.png);
-  width: 14px;
-  height: 14px;
-}
 
 #new-game-button { list-style-image: url(images.png); }
 .new-game-button-normal { -moz-image-region: rect(42px 17px 59px 0); }
@@ -48,12 +43,3 @@ colours for buttons:
 .new-game-button-lost   { -moz-image-region: rect(42px 51px 59px 34px); }
 
 .faded { opacity: 0.6; }
-
-.f0 { list-style-image: none; }
-.f1 { -moz-image-region: rect(0 14px 14px 0); }
-.f2 { -moz-image-region: rect(0 28px 14px 14px); }
-.f3 { -moz-image-region: rect(0 42px 14px 28px); }
-.f4 { -moz-image-region: rect(0 56px 14px 42px); }
-.f5 { -moz-image-region: rect(0 70px 14px 56px); }
-.f6 { -moz-image-region: rect(0 84px 14px 70px); }
-.f7 { -moz-image-region: rect(0 98px 14px 84px); }
