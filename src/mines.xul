@@ -41,7 +41,6 @@
         <menuitem type="checkbox" id="nominesatedges" label="No mines at edges" oncommand="toggleNoMinesAtEdges(this);"/>
       </menupopup>
     </toolbarbutton>
-    <toolbarbutton label="!" oncommand="openDialog('chrome://global/content/console.xul');"/>
   </toolbar>
 </toolbox>
 
