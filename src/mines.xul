@@ -3,10 +3,11 @@
 <?xml-stylesheet href="mines.css" type="text/css"?>
 
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  xmlns:html="http://www.w3.org/1999/xhtml"
   title="Mines"
   >
 
-<script type="application/x-javascript" src="mines.js"/>
+<script src="mines.js"/>
 
 <commandset id="commands">
   <command id="cmd-new" oncommand="newGame();"/>
@@ -80,7 +81,7 @@
     </hbox>
   </vbox>
 
-  <iframe src="view.svg" flex="1" id="svgdoc"/>
+  <html:iframe src="view.svg" flex="1" id="svgdoc"/>
   <label id="msg-pause" onclick="togglePause();" value="Paused"/>
 </hbox>
 
