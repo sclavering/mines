@@ -542,7 +542,8 @@ const _view = {
     const t = this._grid[tile.x][tile.y];
     number = number || ""; // hides 0, and ignores missing arguments
     t.className.baseVal = this._shape + " tile " + string + " n" + number;
-    t._text.data = number;
+    const str = string == 'flag' && number ? number + '⚑' : number;
+    t._text.data = str;
   },
 
   _resizeGrid: function(width, height) {
