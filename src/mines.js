@@ -88,10 +88,10 @@ function toggleNoMinesAtEdges(menuitem) {
 function togglePause() {
   if(ui.pauseCmd.getAttribute("disabled")) return;
   if(paused) {
-    ui.pauseMsg.hidden = true;
+    ui.pauseMsg.style.display = 'none';
     Timer.start();
   } else {
-    ui.pauseMsg.hidden = false;
+    ui.pauseMsg.style.display = 'block';
     Timer.stop();
   }
   paused = !paused;
@@ -113,7 +113,7 @@ function newGame() {
   previousGame = game = new Game(shape, width, height, mines, adj);
   MineCounters.setAll(mines);
   Timer.reset();
-  ui.pauseMsg.hidden = true;
+  ui.pauseMsg.style.display = 'none';
   gOldView = view;
   view = views[gTileShape];
   view.showGrid(width, height);

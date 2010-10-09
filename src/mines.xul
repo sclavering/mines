@@ -78,7 +78,8 @@
   </vbox>
 
   <html:iframe src="view.svg" flex="1" id="svgdoc"/>
-  <label id="msg-pause" onclick="togglePause();" value="Paused"/>
 </hbox>
+
+<html:div id="msg-pause" onclick="togglePause();" style="display:none"><html:div><html:div>Paused</html:div></html:div></html:div>
 
 </window>
