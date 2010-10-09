@@ -438,7 +438,7 @@ var MineCounters = {
 
 
 function safeFirstClickHandler(event) {
-  if(event.button == 2 || event.ctrlKey) return;
+  if(event.button || event.ctrlKey || event.shiftKey) return;
   if(event.target.minesweeperX === undefined) return
   const t = event.target, x = t.minesweeperX, y = t.minesweeperY;
   const el = game.grid[x][y];
@@ -456,7 +456,7 @@ function safeFirstClickHandler(event) {
 function mainClickHandler(event) {
   if(event.target.minesweeperX === undefined) return;
   const t = event.target, x = t.minesweeperX, y = t.minesweeperY;
-  game.tileClicked(x, y, event.button == 2 || event.ctrlKey);
+  game.tileClicked(x, y, event.button || event.ctrlKey || event.shiftKey);
 }
 
 
