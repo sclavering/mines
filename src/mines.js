@@ -24,8 +24,7 @@ var gOldView = null;
 const ui = {
   svgFrame: "svgdoc",
   pauseCmd: "pause-button",
-  pauseMsg: "msg-pause",
-  smileyFace: "new-game-button"
+  pauseMsg: "msg-pause"
 };
 
 // The SVGDocument and Window in which the grid is displayed
@@ -40,10 +39,6 @@ var paused = false;
 // This is assumed to happen after the SVG document is loaded too. Seems to work :)
 window.onload = function() {
   for(var i in ui) ui[i] = document.getElementById(ui[i]);
-
-  ui.smileyFace.setFace = function(face) {
-    this.className = "new-game-button-"+face;
-  };
 
   document.getElementById("dif-"+gCurrentDifficulty).setAttribute("checked","true");
   document.getElementById("shape-"+gTileShape).setAttribute("checked","true");
@@ -119,7 +114,6 @@ function newGame() {
   MineCounters.setAll(mines);
   Timer.reset();
   ui.pauseMsg.hidden = true;
-  ui.smileyFace.setFace("normal");
   gOldView = view;
   view = views[gTileShape];
   view.showGrid(width, height);
@@ -166,13 +160,11 @@ Game.prototype = {
     if(this.squaresRevealed != this.nonMines) return;
     this.end();
     this.updateForGameWon();
-    ui.smileyFace.setFace("won");
   },
 
   lose: function() {
     this.updateForGameLost();
     this.end();
-    ui.smileyFace.setFace("lost");
   },
 
   end: function() {

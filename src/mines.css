@@ -37,9 +37,4 @@ colours for buttons:
   width: 3.5ex;
 }
 
-#new-game-button { list-style-image: url(images.png); }
-.new-game-button-normal { -moz-image-region: rect(42px 17px 59px 0); }
-.new-game-button-won    { -moz-image-region: rect(42px 34px 59px 17px); }
-.new-game-button-lost   { -moz-image-region: rect(42px 51px 59px 34px); }
-
 .faded { opacity: 0.6; }
