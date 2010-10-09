@@ -19,6 +19,7 @@ var gCurrentDifficulty = 1;
 var gTileShape = SQUARE;
 var gMinesPerTile = 1;
 var gNoMinesAtEdges = false;
+var gOldView = null;
 
 const ui = {
   svgFrame: "svgdoc",
@@ -118,7 +119,7 @@ function newGame() {
   Timer.reset();
   ui.pauseMsg.hidden = true;
   ui.smileyFace.setFace("normal");
-  oldview = view;
+  gOldView = view;
   view = views[gTileShape];
   view.showGrid(width, height);
   if(gNoMinesAtEdges) {
@@ -501,8 +502,8 @@ const _view = {
   },
 
   showGrid: function(width, height) {
-    if(this != oldview) {
-      if(oldview) oldview.hide();
+    if(this != gOldView) {
+      if(gOldView) gOldView.hide();
       this._panel.className.baseVal = "";
       this._resizeViewBox();
     }
