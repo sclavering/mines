@@ -9,15 +9,10 @@
 
 <script src="mines.js"/>
 
-<commandset id="commands">
-  <command id="cmd-new" oncommand="newGame();"/>
-  <command id="cmd-pause" oncommand="togglePause();"/>
-</commandset>
-
 <toolbox id="main-toolbox">
   <toolbar id="main-toolbar">
-    <toolbarbutton id="new-game-button" command="cmd-new" label="New"/>
-    <toolbarbutton id="pause-button" command="cmd-pause" label="Pause"/>
+    <toolbarbutton id="new-game-button" label="New" oncommand="newGame();"/>
+    <toolbarbutton id="pause-button" label="Pause" oncommand="togglePause();" disabled="true"/>
     <toolbarbutton id="settings-button" type="menu" label="Settings">
       <menupopup>
         <menuitem type="radio" id="dif-0" name="dif" label="Beginner" oncommand="setDifficulty(0);"/>

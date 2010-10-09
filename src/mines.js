@@ -23,7 +23,7 @@ var gOldView = null;
 
 const ui = {
   svgFrame: "svgdoc",
-  pauseCmd: "cmd-pause",
+  pauseCmd: "pause-button",
   pauseMsg: "msg-pause",
   smileyFace: "new-game-button"
 };
@@ -91,6 +91,7 @@ function toggleNoMinesAtEdges(menuitem) {
 
 
 function togglePause() {
+  if(ui.pauseCmd.getAttribute("disabled")) return;
   if(paused) {
     ui.pauseMsg.hidden = true;
     Timer.start();
