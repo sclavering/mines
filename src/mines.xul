@@ -7,7 +7,7 @@
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
   windowtype="mines"
   id="mines-window2"
-  title="&Minesweeper;"
+  title="Mines"
   persist="screenX screenY width height"
   >
 
@@ -20,30 +20,30 @@
 
 <toolbox id="main-toolbox">
   <toolbar id="main-toolbar">
-    <toolbarbutton id="new-game-button" command="cmd-new" label="&newgame;"/>
-    <toolbarbutton id="pause-button" command="cmd-pause" label="&pause;"/>
-    <toolbarbutton id="settings-button" type="menu" label="&settings;">
+    <toolbarbutton id="new-game-button" command="cmd-new" label="New"/>
+    <toolbarbutton id="pause-button" command="cmd-pause" label="Pause"/>
+    <toolbarbutton id="settings-button" type="menu" label="Settings">
       <menupopup>
-        <menuitem type="radio" id="dif-0" name="dif" label="&beginner;" oncommand="setDifficulty(0);"/>
-        <menuitem type="radio" id="dif-1" name="dif" label="&intermediate;" oncommand="setDifficulty(1);"/>
-        <menuitem type="radio" id="dif-2" name="dif" label="&expert;" oncommand="setDifficulty(2);"/>
+        <menuitem type="radio" id="dif-0" name="dif" label="Beginner" oncommand="setDifficulty(0);"/>
+        <menuitem type="radio" id="dif-1" name="dif" label="Intermediate" oncommand="setDifficulty(1);"/>
+        <menuitem type="radio" id="dif-2" name="dif" label="Expert" oncommand="setDifficulty(2);"/>
         <menuseparator/>
-        <menuitem type="radio" id="shape-sqr" name="shape" label="&squaretiles;" oncommand="newSquareGame();"/>
-        <menuitem type="radio" id="shape-hex" name="shape" label="&hextiles;" oncommand="newHexagonalGame();"/>
+        <menuitem type="radio" id="shape-sqr" name="shape" label="Square tiles" oncommand="newSquareGame();"/>
+        <menuitem type="radio" id="shape-hex" name="shape" label="Hexagonal tiles" oncommand="newHexagonalGame();"/>
         <menuseparator/>
-        <menu label="&minespertile;" oncommand="setMinesPerTile(event.target.getAttribute('value'));">
+        <menu label="Maximum mines per tile" oncommand="setMinesPerTile(event.target.getAttribute('value'));">
           <menupopup id="minespertile-popup">
-            <menuitem id="minespertile-1" type="radio" value="1" label="&minespertile.1;"/>
-            <menuitem id="minespertile-2" type="radio" value="2" label="&minespertile.2;"/>
-            <menuitem id="minespertile-3" type="radio" value="3" label="&minespertile.3;"/>
-            <menuitem id="minespertile-4" type="radio" value="4" label="&minespertile.4;"/>
-            <menuitem id="minespertile-5" type="radio" value="5" label="&minespertile.5;"/>
-            <menuitem id="minespertile-6" type="radio" value="6" label="&minespertile.6;"/>
-            <menuitem id="minespertile-7" type="radio" value="7" label="&minespertile.7;"/>
+            <menuitem id="minespertile-1" type="radio" value="1" label="1"/>
+            <menuitem id="minespertile-2" type="radio" value="2" label="2"/>
+            <menuitem id="minespertile-3" type="radio" value="3" label="3"/>
+            <menuitem id="minespertile-4" type="radio" value="4" label="4"/>
+            <menuitem id="minespertile-5" type="radio" value="5" label="5"/>
+            <menuitem id="minespertile-6" type="radio" value="6" label="6"/>
+            <menuitem id="minespertile-7" type="radio" value="7" label="7"/>
           </menupopup>
         </menu>
         <menuseparator/>
-        <menuitem type="checkbox" id="nominesatedges" label="&nominesatedges;" oncommand="toggleNoMinesAtEdges(this);"/>
+        <menuitem type="checkbox" id="nominesatedges" label="No mines at edges" oncommand="toggleNoMinesAtEdges(this);"/>
       </menupopup>
     </toolbarbutton>
     <toolbarbutton label="!" oncommand="openDialog('chrome://global/content/console.xul');"/>
@@ -87,7 +87,7 @@
   </vbox>
 
   <iframe src="view.svg" flex="1" id="svgdoc"/>
-  <label id="msg-pause" onclick="togglePause();" value="&paused;"/>
+  <label id="msg-pause" onclick="togglePause();" value="Paused"/>
 </hbox>
 
 </window>
