@@ -1,2 +1,0 @@
-zip -ur0 mines.zip content en es ru
-zip -ur9 mines.xpi mines.zip install.rdf chrome.manifest

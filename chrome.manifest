@@ -1,6 +1,0 @@
-overlay  chrome://browser/content/browser.xul  chrome://mines/content/overlay.xul
-
-content  mines  jar:mines.zip!/content/
-locale  mines  en  jar:mines.zip!/en/
-locale  mines  es  jar:mines.zip!/es/
-locale  mines  ru  jar:mines.zip!/ru/
