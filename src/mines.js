@@ -20,8 +20,6 @@ var gTileShape = SQUARE;
 var gMinesPerTile = 1;
 var gNoMinesAtEdges = false;
 
-var gPrefs; // an nsIPrefBranch
-
 const ui = {
   svgFrame: "svgdoc",
   pauseCmd: "cmd-pause",
@@ -46,23 +44,8 @@ window.onload = function() {
     this.className = "new-game-button-"+face;
   };
 
-  gPrefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService);
-  gPrefs = gPrefs.getBranch("games.minesweeper.");
-
-  // restore difficulty level
-  try { gCurrentDifficulty = gPrefs.getIntPref("difficulty-level"); } catch(e) {}
   document.getElementById("dif-"+gCurrentDifficulty).setAttribute("checked","true");
-
-  // restore tile shape
-  try {
-    gTileShape = gPrefs.getCharPref("tile-shape");
-    // to account for "square" (the old version of "sqr");
-    if(!(gTileShape in computeAdjacents)) gTileShape = SQUARE;
-  } catch(e) {}
   document.getElementById("shape-"+gTileShape).setAttribute("checked","true");
-
-  // restore mines-per-tile
-  try { gMinesPerTile = gPrefs.getIntPref("mines-per-tile"); } catch(e) {}
   document.getElementById("minespertile-"+gMinesPerTile).setAttribute("checked","true");
 
   svgWin = ui.svgFrame.contentWindow;
@@ -79,7 +62,6 @@ window.onload = function() {
 
 function setDifficulty(difficulty) {
   gCurrentDifficulty = difficulty;
-  gPrefs.setIntPref("difficulty-level", difficulty);
   newGame();
 }
 
@@ -93,13 +75,11 @@ function newHexagonalGame() {
 
 function setMinesPerTile(num) {
   gMinesPerTile = num;
-  gPrefs.setIntPref("mines-per-tile", num);
   newGame();
 }
 
 function setTileShape(shape) {
   gTileShape = shape;
-  gPrefs.setCharPref("tile-shape", shape);
   newGame();
 }
 
