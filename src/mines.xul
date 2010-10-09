@@ -2,13 +2,8 @@
 
 <?xml-stylesheet href="mines.css" type="text/css"?>
 
-<!DOCTYPE window SYSTEM "chrome://mines/locale/mines.dtd">
-
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-  windowtype="mines"
-  id="mines-window2"
   title="Mines"
-  persist="screenX screenY width height"
   >
 
 <script type="application/x-javascript" src="mines.js"/>
