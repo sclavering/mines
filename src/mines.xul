@@ -10,11 +10,12 @@
 
 <script src="mines.js"/>
 
-<toolbox id="main-toolbox">
-  <toolbar id="main-toolbar">
-    <toolbarbutton id="new-game-button" label="New" oncommand="newGame();"/>
-    <toolbarbutton id="pause-button" label="Pause" oncommand="togglePause();" disabled="true"/>
-    <toolbarbutton id="settings-button" type="menu" label="Settings">
+<div id="status-panel" xmlns="http://www.w3.org/1999/xhtml">
+
+  <vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    <button id="new-game-button" label="New" oncommand="newGame();"/>
+    <button id="pause-button" label="Pause" oncommand="togglePause();" disabled="true"/>
+    <button id="settings-button" type="menu" label="Settings">
       <menupopup>
         <menuitem type="radio" id="dif-0" name="dif" label="Beginner" oncommand="setDifficulty(0);"/>
         <menuitem type="radio" id="dif-1" name="dif" label="Intermediate" oncommand="setDifficulty(1);"/>
@@ -37,48 +38,31 @@
         <menuseparator/>
         <menuitem type="checkbox" id="nominesatedges" label="No mines at edges" oncommand="toggleNoMinesAtEdges(this);"/>
       </menupopup>
-    </toolbarbutton>
-  </toolbar>
-</toolbox>
-
-
-<hbox id="main-panel" flex="1">
-  <vbox id="status-panel">
-
-    <label id="timer"/>
-
-    <hbox align="center">
-      <label class="n1" value="1⚑"/>
-      <label id="mine-counter-0"/>
-    </hbox>
-    <hbox align="center">
-      <label class="n2" value="2⚑"/>
-      <label id="mine-counter-1"/>
-    </hbox>
-    <hbox align="center">
-      <label class="n3" value="3⚑"/>
-      <label id="mine-counter-2"/>
-    </hbox>
-    <hbox align="center">
-      <label class="n4" value="4⚑"/>
-      <label id="mine-counter-3"/>
-    </hbox>
-    <hbox align="center">
-      <label class="n5" value="5⚑"/>
-      <label id="mine-counter-4"/>
-    </hbox>
-    <hbox align="center">
-      <label class="n6" value="6⚑"/>
-      <label id="mine-counter-5"/>
-    </hbox>
-    <hbox align="center">
-      <label class="n7" value="7⚑"/>
-      <label id="mine-counter-6"/>
-    </hbox>
+    </button>
   </vbox>
 
-  <html:iframe src="view.svg" flex="1" id="svgdoc"/>
-</hbox>
+  <table><tbody>
+    <tr><th>Time</th><td id="timer"/></tr>
+    <tr><th class="n1">1⚑</th><td id="mine-counter-1"></td></tr>
+    <tr><th class="n2">2⚑</th><td id="mine-counter-2"></td></tr>
+    <tr><th class="n3">3⚑</th><td id="mine-counter-3"></td></tr>
+    <tr><th class="n4">4⚑</th><td id="mine-counter-4"></td></tr>
+    <tr><th class="n5">5⚑</th><td id="mine-counter-5"></td></tr>
+    <tr><th class="n6">6⚑</th><td id="mine-counter-6"></td></tr>
+    <tr><th class="n7">7⚑</th><td id="mine-counter-7"></td></tr>
+  </tbody></table>
+</div>
+
+<html:div id="wrapper">
+  <svg id="gameview" xmlns="http://www.w3.org/2000/svg" version="1.0" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet">
+    <defs id="defs">
+      <path id="hex" class="shape" d="M 112,0 L 37,0 L 0,65 L 37,130 L 112,130 L 149,65 z"/>
+      <path id="sqr" class="shape" d="M 0,0 L 50,0 50,50 0,50 z"/>
+    </defs>
+    <g id="hexgrid" class="hidden"/>
+    <g id="sqrgrid" class="hidden"/>
+  </svg>
+</html:div>
 
 <html:div id="msg-pause" onclick="togglePause();" style="display:none"><html:div><html:div>Paused</html:div></html:div></html:div>
 

@@ -1,27 +1,24 @@
 @import url(chrome://global/skin/);
 
-iframe {
+@import url(views.css);
+
+#wrapper {
   border: 0;
+  position: fixed;
+  top: 0;
+  right: 100px;
+  bottom: 0;
+  left: 0;
 }
 
-#main-panel {
-  background: #ebe8d8;
-  padding-left: 4px;
-}
 
-#game-panel {
-  padding: 2px;
-  border-left: 2px solid;
+#status-panel {
+  position: fixed;
+  right: 0;
+  width: 100px;
+  bottom: 0;
+  top: 0;
 }
-
-#mine-counter-0,
-#mine-counter-1,
-#mine-counter-2,
-#timer {
-  width: 3.5ex;
-}
-
-.faded { opacity: 0.6; }
 
 
 #msg-pause {

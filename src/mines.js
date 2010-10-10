@@ -22,14 +22,11 @@ var gNoMinesAtEdges = false;
 var gOldView = null;
 
 const ui = {
-  svgFrame: "svgdoc",
   pauseCmd: "pause-button",
   pauseMsg: "msg-pause"
 };
+var gameview = null; // <svg/>
 
-// The SVGDocument and Window in which the grid is displayed
-var svgDoc = null;
-var svgWin = null;
 
 var view = null; // views.hex or views.sqr
 var game = null; // a Game object
@@ -44,8 +41,8 @@ window.onload = function() {
   document.getElementById("shape-"+gTileShape).setAttribute("checked","true");
   document.getElementById("minespertile-"+gMinesPerTile).setAttribute("checked","true");
 
-  svgWin = ui.svgFrame.contentWindow;
-  svgDoc = svgWin.document;
+  gameview = document.getElementById("gameview");
+
   views.hex.init();
   views.sqr.init();
 
@@ -120,11 +117,11 @@ function newGame() {
   if(gNoMinesAtEdges) {
     game.fillGrid()
     game.revealEdges();
-    svgDoc.onclick = mainClickHandler;
+    gameview.onclick = mainClickHandler;
     ui.pauseCmd.removeAttribute("disabled");
     Timer.start();
   } else {
-    svgDoc.onclick = safeFirstClickHandler;
+    gameview.onclick = safeFirstClickHandler;
   }
 };
 
@@ -170,7 +167,7 @@ Game.prototype = {
   end: function() {
     game = null;
     Timer.stop();
-    svgDoc.onclick = null;
+    gameview.onclick = null;
     ui.pauseCmd.setAttribute("disabled", "true");
   },
 
@@ -248,8 +245,8 @@ Game.prototype = {
   },
 
   adjustFlags: function(tile, num) {
-    MineCounters.increase(tile.flags);
-    MineCounters.decrease(num);
+    if(tile.flags) MineCounters.increase(tile.flags);
+    if(num) MineCounters.decrease(num);
     tile.flags = num;
     view.update(tile, "flag", num);
   },
@@ -373,7 +370,7 @@ var Timer = {
   },
 
   increment: function() {
-    Timer.display.value = (++Timer.time);
+    Timer.display.textContent = (++Timer.time);
   },
 
   stop: function() {
@@ -383,7 +380,7 @@ var Timer = {
 
   reset: function() {
     this.time = 0;
-    this.display.value = 0;
+    this.display.textContent = 0;
   }
 }
 
@@ -392,40 +389,37 @@ var Timer = {
 var MineCounters = {
   values: [],
   // These hold a dummy object for the non-existent 0-mines counter
-  containers: [{}],
-  displays: [{}],
+  displays: [null],
 
   init: function() {
-    var i = 0;
+    var i = 1;
     while(true) {
       var elt = document.getElementById("mine-counter-" + i++);
       if(!elt) break;
       this.displays.push(elt);
-      this.containers.push(elt.parentNode);
     }
   },
 
   increase: function(c) {
     this.values[c]++;
-    this.displays[c].value = this.values[c];
+    this.displays[c].textContent = this.values[c];
   },
   decrease: function(c) {
     this.values[c]--;
-    this.displays[c].value = this.values[c];
+    this.displays[c].textContent = this.values[c];
   },
 
   resetAll: function() {
-    for(var i = 0; i != this.values.length; i++) this.displays[i].value = 0;
+    for(var i = 0; i != this.values.length; i++) this.displays[i].textContent = 0;
   },
   setAll: function(newvals) {
     const vals = this.values = [0].concat(newvals);
-    const num = vals.length, ds = this.displays, cs = this.containers;
-    for(var i = 0; i != num; i++) {
-      ds[i].value = vals[i];
-      cs[i].collapsed = false;
+    const num = vals.length, ds = this.displays;
+    for(var i = 1; i != num; i++) {
+      ds[i].textContent = vals[i];
+      ds[i].parentNode.style.visibility = 'visible';
     }
-    // hide unwanted counters
-    for(; i != ds.length; i++) cs[i].collapsed = true;
+    for(; i != ds.length; i++) ds[i].parentNode.style.visibility = 'hidden';
   }
 }
 
@@ -441,7 +435,7 @@ function safeFirstClickHandler(event) {
   game.fillGrid();
   el.mines = 0;
   Timer.start();
-  svgDoc.onclick = mainClickHandler;
+  gameview.onclick = mainClickHandler;
   ui.pauseCmd.removeAttribute("disabled");
   game.tileClicked(x, y, false);
 }
@@ -455,7 +449,6 @@ function mainClickHandler(event) {
 
 
 const SVG = "http://www.w3.org/2000/svg";
-const XLINK = "http://www.w3.org/1999/xlink";
 
 // Parameters of the basic hexagonal path being used.  The dimensions are
 // essentially abitrary.
@@ -477,16 +470,16 @@ const _view = {
   _height: 0,
 
   init: function() {
-    const shape = svgDoc.getElementById(this._shape);
+    const shape = document.getElementById(this._shape);
     shape.id = "";
-    const tile = this._tile = svgDoc.createElementNS(SVG, "g");
+    const tile = this._tile = document.createElementNS(SVG, "g");
     tile.appendChild(shape);
-    const text = svgDoc.createElementNS(SVG, "text");
+    const text = document.createElementNS(SVG, "text");
     text.setAttribute("x", this._textPosition[0]);
     text.setAttribute("y", this._textPosition[1]);
-    text.appendChild(svgDoc.createTextNode(""));
+    text.appendChild(document.createTextNode(""));
     tile.appendChild(text);
-    this._panel = svgDoc.getElementById(this._shape + "grid");
+    this._panel = document.getElementById(this._shape + "grid");
     this._grid = [];
   },
 
@@ -546,7 +539,7 @@ const _view = {
   },
 
   _resizeViewBox: function() {
-    const vb = svgDoc.documentElement.viewBox.baseVal;
+    const vb = gameview.viewBox.baseVal;
     [vb.width, vb.height] = this._viewBoxSize();
   }
 };
