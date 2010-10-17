@@ -1,32 +1,31 @@
-<?xml version="1.0"?>
+<!DOCTYPE html>
 
-<?xml-stylesheet href="mines.css" type="text/css"?>
-<?xml-stylesheet href="view.css" type="text/css"?>
+<html xmlns="http://www.w3.org/1999/xhtml">
 
-<xul:window xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-  xmlns="http://www.w3.org/1999/xhtml"
-  title="Mines"
-  >
+<head>
+  <meta charset="utf-8"/>
+  <link rel="stylesheet" href="mines.css"/>
+  <link rel="stylesheet" href="view.css"/>
+  <title>Mines</title>
+  <script src="mines.js"></script>
+</head>
 
-<script src="mines.js"/>
+<body>
 
 <div id="status-panel">
-
-  <vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-    <button id="new-game-button" label="New" oncommand="newGame();"/>
-    <button id="pause-button" label="Pause" oncommand="togglePause();" disabled="true"/>
-    <button id="settings-button" label="Settings" oncommand="showSettings();"/>
-  </vbox>
+  <input type="button" id="new-game-button" value="New" onclick="newGame();"/>
+  <input type="button" id="pause-button" value="Pause" onclick="togglePause();" disabled="disabled"/>
+  <input type="button" id="settings-button" value="Settings" onclick="showSettings();"/>
 
   <table><tbody>
     <tr><th>Time</th><td id="timer"/></tr>
-    <tr><th class="n1">1⚑</th><td id="mine-counter-1"></td></tr>
-    <tr><th class="n2">2⚑</th><td id="mine-counter-2"></td></tr>
-    <tr><th class="n3">3⚑</th><td id="mine-counter-3"></td></tr>
-    <tr><th class="n4">4⚑</th><td id="mine-counter-4"></td></tr>
-    <tr><th class="n5">5⚑</th><td id="mine-counter-5"></td></tr>
-    <tr><th class="n6">6⚑</th><td id="mine-counter-6"></td></tr>
-    <tr><th class="n7">7⚑</th><td id="mine-counter-7"></td></tr>
+    <tr><th class="n1">1⚑</th><td><span id="mine-counter-1"></span></td></tr>
+    <tr><th class="n2">2⚑</th><td><span id="mine-counter-2"></span></td></tr>
+    <tr><th class="n3">3⚑</th><td><span id="mine-counter-3"></span></td></tr>
+    <tr><th class="n4">4⚑</th><td><span id="mine-counter-4"></span></td></tr>
+    <tr><th class="n5">5⚑</th><td><span id="mine-counter-5"></span></td></tr>
+    <tr><th class="n6">6⚑</th><td><span id="mine-counter-6"></span></td></tr>
+    <tr><th class="n7">7⚑</th><td><span id="mine-counter-7"></span></td></tr>
   </tbody></table>
 </div>
 
@@ -69,4 +68,5 @@
   </form>
 </div>
 
-</xul:window>
+</body>
+</html>

@@ -418,9 +418,9 @@ var MineCounters = {
     const num = vals.length, ds = this.displays;
     for(var i = 1; i != num; i++) {
       ds[i].textContent = vals[i];
-      ds[i].parentNode.style.visibility = 'visible';
+      ds[i].parentNode.parentNode.style.visibility = 'visible';
     }
-    for(; i != ds.length; i++) ds[i].parentNode.style.visibility = 'hidden';
+    for(; i != ds.length; i++) ds[i].parentNode.parentNode.style.visibility = 'hidden';
   }
 }
 
