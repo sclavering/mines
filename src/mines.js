@@ -1,6 +1,3 @@
-const HEXAGONAL = "hex";
-const SQUARE = "sqr";
-
 const kWidths = [9,16,30];
 const kHeights = [9,16,16];
 
@@ -16,14 +13,16 @@ const kMines = [null,
 
 
 var gCurrentDifficulty = 1;
-var gTileShape = SQUARE;
+var gTileShape = 'sqr'; // or 'hex'
 var gMinesPerTile = 1;
 var gNoMinesAtEdges = false;
 var gOldView = null;
 
 const ui = {
-  pauseCmd: "pause-button",
-  pauseMsg: "msg-pause"
+  pauseCmd: 'pause-button',
+  pauseMsg: 'msg-pause',
+  settingsOverlay: 'settings-overlay',
+  settingsForm: 'settings-form',
 };
 var gameview = null; // <svg/>
 
@@ -37,10 +36,6 @@ var paused = false;
 window.onload = function() {
   for(var i in ui) ui[i] = document.getElementById(ui[i]);
 
-  document.getElementById("dif-"+gCurrentDifficulty).setAttribute("checked","true");
-  document.getElementById("shape-"+gTileShape).setAttribute("checked","true");
-  document.getElementById("minespertile-"+gMinesPerTile).setAttribute("checked","true");
-
   gameview = document.getElementById("gameview");
 
   views.hex.init();
@@ -52,33 +47,39 @@ window.onload = function() {
 };
 
 
+function showSettings() {
+  if(!paused) togglePause();
+  setRadioValue(ui.settingsForm['f_difficulty'], gCurrentDifficulty);
+  setRadioValue(ui.settingsForm['f_shape'], gTileShape);
+  setRadioValue(ui.settingsForm['f_minespertile'], gMinesPerTile);
+  ui.settingsForm['f_nominesatedges'].checked = gNoMinesAtEdges;
+  ui.settingsOverlay.style.display = 'block';
+}
 
-function setDifficulty(difficulty) {
-  gCurrentDifficulty = difficulty;
+
+function onSettingsCancelled() {
+  ui.settingsOverlay.style.display = 'none';
+}
+
+
+function onSettingsChanged(form) {
+  gCurrentDifficulty = parseInt(getRadioValue(form['f_difficulty'], 1));
+  gTileShape = getRadioValue(form['f_shape'], 'sqr');
+  gMinesPerTile = parseInt(getRadioValue(form['f_minespertile'], 1));
+  gNoMinesAtEdges = form['f_nominesatedges'].checked;
+  ui.settingsOverlay.style.display = 'none';
   newGame();
 }
 
-function newSquareGame() {
-  setTileShape(SQUARE);
+
+function setRadioValue(elements, value) {
+  for each(var e in elements) if(e.value == value) e.checked = true;
 }
 
-function newHexagonalGame() {
-  setTileShape(HEXAGONAL);
-}
 
-function setMinesPerTile(num) {
-  gMinesPerTile = num;
-  newGame();
-}
-
-function setTileShape(shape) {
-  gTileShape = shape;
-  newGame();
-}
-
-function toggleNoMinesAtEdges(menuitem) {
-  gNoMinesAtEdges = menuitem.getAttribute("checked")=="true";
-  newGame();
+function getRadioValue(elements, default_value) {
+  for each(var e in elements) if(e.checked) return e.value;
+  return default_value;
 }
 
 

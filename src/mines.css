@@ -21,14 +21,32 @@
 }
 
 
+#settings-overlay,
 #msg-pause {
-  display: block;
+  display: none;
   position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
   background: rgba(0, 0, 0, 0.5);
+}
+
+
+#settings-overlay form {
+  margin: 3em auto 0;
+  width: 50%;
+  background: #ddd;
+  padding: 1.5em;
+}
+
+#settings-overlay h6 {
+  font-size: 1em;
+  margin: 1em 0;
+}
+
+
+#msg-pause {
   text-shadow: black 0 0 5px;
   color: white;
   font-size: 25px;

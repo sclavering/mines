@@ -3,42 +3,19 @@
 <?xml-stylesheet href="mines.css" type="text/css"?>
 <?xml-stylesheet href="view.css" type="text/css"?>
 
-<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-  xmlns:html="http://www.w3.org/1999/xhtml"
+<xul:window xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  xmlns="http://www.w3.org/1999/xhtml"
   title="Mines"
   >
 
 <script src="mines.js"/>
 
-<div id="status-panel" xmlns="http://www.w3.org/1999/xhtml">
+<div id="status-panel">
 
   <vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
     <button id="new-game-button" label="New" oncommand="newGame();"/>
     <button id="pause-button" label="Pause" oncommand="togglePause();" disabled="true"/>
-    <button id="settings-button" type="menu" label="Settings">
-      <menupopup>
-        <menuitem type="radio" id="dif-0" name="dif" label="Beginner" oncommand="setDifficulty(0);"/>
-        <menuitem type="radio" id="dif-1" name="dif" label="Intermediate" oncommand="setDifficulty(1);"/>
-        <menuitem type="radio" id="dif-2" name="dif" label="Expert" oncommand="setDifficulty(2);"/>
-        <menuseparator/>
-        <menuitem type="radio" id="shape-sqr" name="shape" label="Square tiles" oncommand="newSquareGame();"/>
-        <menuitem type="radio" id="shape-hex" name="shape" label="Hexagonal tiles" oncommand="newHexagonalGame();"/>
-        <menuseparator/>
-        <menu label="Maximum mines per tile" oncommand="setMinesPerTile(event.target.getAttribute('value'));">
-          <menupopup id="minespertile-popup">
-            <menuitem id="minespertile-1" type="radio" value="1" label="1"/>
-            <menuitem id="minespertile-2" type="radio" value="2" label="2"/>
-            <menuitem id="minespertile-3" type="radio" value="3" label="3"/>
-            <menuitem id="minespertile-4" type="radio" value="4" label="4"/>
-            <menuitem id="minespertile-5" type="radio" value="5" label="5"/>
-            <menuitem id="minespertile-6" type="radio" value="6" label="6"/>
-            <menuitem id="minespertile-7" type="radio" value="7" label="7"/>
-          </menupopup>
-        </menu>
-        <menuseparator/>
-        <menuitem type="checkbox" id="nominesatedges" label="No mines at edges" oncommand="toggleNoMinesAtEdges(this);"/>
-      </menupopup>
-    </button>
+    <button id="settings-button" label="Settings" oncommand="showSettings();"/>
   </vbox>
 
   <table><tbody>
@@ -53,7 +30,7 @@
   </tbody></table>
 </div>
 
-<html:div id="wrapper">
+<div id="wrapper">
   <svg id="gameview" xmlns="http://www.w3.org/2000/svg" version="1.0" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet">
     <defs id="defs">
       <path id="hex" class="shape" d="M 112,0 L 37,0 L 0,65 L 37,130 L 112,130 L 149,65 z"/>
@@ -62,8 +39,34 @@
     <g id="hexgrid" class="hidden"/>
     <g id="sqrgrid" class="hidden"/>
   </svg>
-</html:div>
+</div>
 
-<html:div id="msg-pause" onclick="togglePause();" style="display:none"><html:div><html:div>Paused</html:div></html:div></html:div>
+<div id="msg-pause" onclick="togglePause();" style="display:none"><div><div>Paused</div></div></div>
 
-</window>
+<div id="settings-overlay">
+  <form id="settings-form" onsubmit="onSettingsChanged(this); return false" action="#">
+    <h6>Difficulty</h6>
+    <label><input type="radio" name="f_difficulty" value="0"/>Beginner</label>
+    <label><input type="radio" name="f_difficulty" value="1"/>Intermediate</label>
+    <label><input type="radio" name="f_difficulty" value="2"/>Expert</label>
+    <h6>Tiles</h6>
+    <label><input type="radio" name="f_shape" value="sqr"/>Square tiles</label>
+    <label><input type="radio" name="f_shape" value="hex"/>Hexagonal tiles</label>
+    <h6>Maxiumum mines per tile</h6>
+    <label><input type="radio" name="f_minespertile" value="1"/>1</label>
+    <label><input type="radio" name="f_minespertile" value="2"/>2</label>
+    <label><input type="radio" name="f_minespertile" value="3"/>3</label>
+    <label><input type="radio" name="f_minespertile" value="4"/>4</label>
+    <label><input type="radio" name="f_minespertile" value="5"/>5</label>
+    <label><input type="radio" name="f_minespertile" value="6"/>6</label>
+    <label><input type="radio" name="f_minespertile" value="7"/>7</label>
+    <h6>Misc</h6>
+    <label><input type="checkbox" id="f_nominesatedges" name="nominesatedges"/>No mines at edges</label>
+    <p>
+      <input type="button" value="Cancel" onclick="onSettingsCancelled();"/>
+      <input type="submit" value="OK"/>
+    </p>
+  </form>
+</div>
+
+</xul:window>
