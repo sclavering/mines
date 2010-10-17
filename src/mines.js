@@ -390,7 +390,7 @@ var Timer = {
 var MineCounters = {
   values: [],
   // These hold a dummy object for the non-existent 0-mines counter
-  displays: [null],
+  displays: [{}],
 
   init: function() {
     var i = 1;
