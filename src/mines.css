@@ -7,6 +7,12 @@
   left: 0;
 }
 
+#gameview {
+  /* suppres double-click or shift-click selection on the <svg> game view, because the highlighting looks ridiculous */
+  user-select: none;
+  -moz-user-select: none;
+}
+
 
 #status-panel {
   position: fixed;

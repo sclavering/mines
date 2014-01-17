@@ -443,6 +443,7 @@ function safeFirstClickHandler(event) {
 
 function mainClickHandler(event) {
   if(event.target.minesweeperX === undefined) return;
+  event.preventDefault();
   const t = event.target, x = t.minesweeperX, y = t.minesweeperY;
   game.tileClicked(x, y, event.button || event.ctrlKey || event.shiftKey);
 }
