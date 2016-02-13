@@ -73,12 +73,12 @@ function onSettingsChanged(form) {
 
 
 function setRadioValue(elements, value) {
-  for each(var e in elements) if(e.value == value) e.checked = true;
+  for(let e of elements) if(e.value == value) e.checked = true;
 }
 
 
 function getRadioValue(elements, default_value) {
-  for each(var e in elements) if(e.checked) return e.value;
+  for(let e of elements) if(e.checked) return e.value;
   return default_value;
 }
 
