@@ -7,6 +7,16 @@ const half_width = 75; // for text positioning
 const sqr_size = 50;
 const half_square = 25;
 
+const number_colours = {
+    1: "blue",
+    2: "#008400",
+    3: "red",
+    4: "#000084",
+    5: "#840000",
+    6: "#008484",
+    7: "#840084",
+};
+
 
 const GridUI = React.createClass({
     render(props) {
@@ -24,9 +34,11 @@ function TileWrapper(props) {
     const Component = shape === "sqrdiag" ? SquareTile : HexTile;
     const tile_view_state = props.tile_view_state;
     const tile = props.tile;
-    const tile_status_class = tile.error || (tile.revealed ? "clear n" + tile.number : "flag n" + tile.flags); 
-    const display_num = tile.error ? tile.mines : tile.revealed ? tile.number : (tile.flags ? tile.flags + "⚑" : "");
-    return <Component tile={ tile } tile_class={ shape + " tile " + tile_status_class } tile_text={ display_num || "" }
+    const tile_status_class = tile.error || (tile.revealed ? "clear" : "flag");
+    const display_text = tile.error ? tile.mines : tile.revealed ? tile.number : (tile.flags ? tile.flags + "⚑" : "");
+    const colour_num = tile.revealed ? tile.number : tile.flags;
+    return <Component tile={ tile } tile_class={ shape + " tile " + tile_status_class } tile_text={ display_text || "" }
+        style={{ color: number_colours[colour_num] || null }}
         onclick={ ev => {
             ev.preventDefault();
             if(game) game.click_handler(tile, ev.button || ev.ctrlKey || ev.shiftKey);
@@ -36,7 +48,7 @@ function TileWrapper(props) {
 
 function SquareTile(props) {
     const transform = "translate(" + (props.tile.x * sqr_size) + "," + (props.tile.y * sqr_size) + ")";
-    return <g transform={ transform } className={ props.tile_class } onClick={ props.onclick }>
+    return <g transform={ transform } className={ props.tile_class } style={ props.style } onClick={ props.onclick }>
         <path className="shape" d="M 0,0 L 50,0 50,50 0,50 z"/>
         <text x={ half_square } y={ half_square }>{ props.tile_text }</text>
     </g>;
@@ -44,7 +56,7 @@ function SquareTile(props) {
 
 function HexTile(props) {
     const transform = "translate(" + (props.tile.x * col_width) + "," + ((2 * props.tile.y + (props.tile.x % 2 ? 0 : 1)) * half_height) + ")";
-    return <g transform={ transform } className={ props.tile_class } onClick={ props.onclick }>
+    return <g transform={ transform } className={ props.tile_class } style={ props.style } onClick={ props.onclick }>
         <path className="shape" d="M 112,0 L 37,0 L 0,65 L 37,130 L 112,130 L 149,65 z"/>
         <text x={ half_width } y={ half_height }>{ props.tile_text }</text>
     </g>;
