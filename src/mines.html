@@ -1,11 +1,16 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
   <meta charset="utf-8"/>
   <link rel="stylesheet" href="mines.css"/>
   <title>Mines</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser-polyfill.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.7/react.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.7/react-dom.min.js"></script>
+  <script src="gridutil.js"></script>
+  <script src="gridui.js"></script>
   <script src="mines.js"></script>
 </head>
 
@@ -28,16 +33,7 @@
   </tbody></table>
 </div>
 
-<div id="wrapper">
-  <svg id="gameview" xmlns="http://www.w3.org/2000/svg" version="1.0" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet" width="100%" height="100%">
-    <defs id="defs">
-      <path id="hex" class="shape" d="M 112,0 L 37,0 L 0,65 L 37,130 L 112,130 L 149,65 z"/>
-      <path id="sqr" class="shape" d="M 0,0 L 50,0 50,50 0,50 z"/>
-    </defs>
-    <g id="hexgrid" class="hidden"/>
-    <g id="sqrgrid" class="hidden"/>
-  </svg>
-</div>
+<div id="wrapper"></div>
 
 <div id="msg-pause" onclick="togglePause();" style="display:none"><div><div>Paused</div></div></div>
 
@@ -48,7 +44,7 @@
     <label><input type="radio" name="f_difficulty" value="1"/>Intermediate</label>
     <label><input type="radio" name="f_difficulty" value="2"/>Expert</label>
     <h6>Tiles</h6>
-    <label><input type="radio" name="f_shape" value="sqr"/>Square tiles</label>
+    <label><input type="radio" name="f_shape" value="sqrdiag"/>Square tiles</label>
     <label><input type="radio" name="f_shape" value="hex"/>Hexagonal tiles</label>
     <h6>Maxiumum mines per tile</h6>
     <label><input type="radio" name="f_minespertile" value="1"/>1</label>

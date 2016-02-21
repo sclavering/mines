@@ -2,21 +2,20 @@ const kWidths = [9,16,30];
 const kHeights = [9,16,16];
 
 const kMines = [null,
-  [[10],[40],[100]],
-  [[6,4],[24,16],[60,40]],
-  [[5,3,2],[20,12,8],[50,30,20]],
-  [[4,3,2,1],[16,12,8,4],[40,30,20,10]],
-  [[4,2,2,1,1],[15,10,7,5,3],[40,24,18,12,6]],
-  [[3,2,2,1,1,1],[15,10,6,4,3,2],[35,25,16,11,8,5]],
-  [[2,2,2,1,1,1,1],[15,9,6,4,3,2,1],[30,24,18,12,8,5,3]]
+  [[0,10], [0,40], [0,100]],
+  [[0,6,4], [0,24,16], [0,60,40]],
+  [[0,5,3,2], [0,20,12,8], [0,50,30,20]],
+  [[0,4,3,2,1], [0,16,12,8,4], [0,40,30,20,10]],
+  [[0,4,2,2,1,1], [0,15,10,7,5,3], [0,40,24,18,12,6]],
+  [[0,3,2,2,1,1,1], [0,15,10,6,4,3,2], [0,35,25,16,11,8,5]],
+  [[0,2,2,2,1,1,1,1], [0,15,9,6,4,3,2,1], [0,30,24,18,12,8,5,3]]
 ];
 
 
 var gCurrentDifficulty = 1;
-var gTileShape = 'sqr'; // or 'hex'
+var gTileShape = 'sqrdiag'; // or 'hex'
 var gMinesPerTile = 1;
 var gNoMinesAtEdges = false;
-var gOldView = null;
 
 const ui = {
   pauseCmd: 'pause-button',
@@ -24,23 +23,14 @@ const ui = {
   settingsOverlay: 'settings-overlay',
   settingsForm: 'settings-form',
 };
-var gameview = null; // <svg/>
 
 
-var view = null; // views.hex or views.sqr
 var game = null; // a Game object
-var previousGame = null;
 var paused = false;
 
 // This is assumed to happen after the SVG document is loaded too. Seems to work :)
 window.onload = function() {
   for(var i in ui) ui[i] = document.getElementById(ui[i]);
-
-  gameview = document.getElementById("gameview");
-
-  views.hex.init();
-  views.sqr.init();
-
   Timer.init();
   MineCounters.init();
   newGame();
@@ -64,7 +54,7 @@ function onSettingsCancelled() {
 
 function onSettingsChanged(form) {
   gCurrentDifficulty = parseInt(getRadioValue(form['f_difficulty'], 1));
-  gTileShape = getRadioValue(form['f_shape'], 'sqr');
+  gTileShape = getRadioValue(form['f_shape'], 'sqrdiag');
   gMinesPerTile = parseInt(getRadioValue(form['f_minespertile'], 1));
   gNoMinesAtEdges = form['f_nominesatedges'].checked;
   ui.settingsOverlay.style.display = 'none';
@@ -96,6 +86,13 @@ function togglePause() {
 }
 
 
+function show_game(game) {
+  const wrapper = document.getElementById("wrapper");
+  ReactDOM.unmountComponentAtNode(wrapper);
+  return ReactDOM.render(React.createElement(GridUI, { game: game }), wrapper);
+};
+
+
 function newGame() {
   if(game) game.end();
 
@@ -103,57 +100,53 @@ function newGame() {
   const height = kHeights[gCurrentDifficulty];
   const mines = kMines[gMinesPerTile][gCurrentDifficulty];
   const shape = gTileShape;
+  game = new Game(shape, width, height, mines);
 
-  const g2 = previousGame;
-  var adj = g2 && g2.width == width && g2.height == height && g2.shape == shape;
-  adj = adj ? previousGame.adjacents : computeAdjacents[shape](width, height);
-
-  previousGame = game = new Game(shape, width, height, mines, adj);
   MineCounters.setAll(mines);
   Timer.reset();
   ui.pauseMsg.style.display = 'none';
-  gOldView = view;
-  view = views[gTileShape];
-  view.showGrid(width, height);
+  game.gridui = show_game(game);
   if(gNoMinesAtEdges) {
     game.fillGrid()
     game.revealEdges();
-    gameview.onclick = mainClickHandler;
+    game.first_click_handled = true;
     ui.pauseCmd.removeAttribute("disabled");
     Timer.start();
-  } else {
-    gameview.onclick = safeFirstClickHandler;
   }
 };
 
-function Game(shape, width, height, mines, adjacents) {
+function Game(shape, width, height, mines) {
   this.shape = shape
   this.width = width;
   this.height = height;
   this.mines = mines; // mine-count -> tile-count mapping array, offset by 1
-  this.adjacents = adjacents;
   // The number of tiles which have no mines
   this.nonMines = this.width * this.height;
   for(var i in mines) this.nonMines -= this.mines[i];
-  // the maximum number of flags on a single square.  >1 in advanced games
-  this.maxFlags = mines.length;
+  this.maxFlags = mines.length - 1;
   this.squaresRevealed = 0;
-  const grid = this.grid = new Array(width);
-  for(var x = 0; x != width; ++x) {
-    grid[x] = new Array(height);
-    for(var y = 0; y != height; ++y) grid[x][y] = new Tile(x, y);
+  this.grid = GridUtil.generate(shape, width, height, false);
+  for(let tile of this.grid.tiles) {
+    tile.revealed = false;
+    tile.flags = 0;
+    tile.mines = 0;
+    tile.number = 0;
+    this.error = null;
   }
+  this.view_versions = {};
+  for(let tile of this.grid.tiles) this.view_versions[tile.id] = 1;
+
+  this.ended = false;
+  this.first_click_handled = false;
+  this.click_handler = (tile, is_non_standard_click) => {
+    if(this.ended) return;
+    if(this.first_click_handled) game.tileClicked(tile, is_non_standard_click);
+    else if(!is_non_standard_click) safeFirstClickHandler(tile);
+    this.gridui.forceUpdate();
+  };
 };
 
 Game.prototype = {
-  // An x -> y -> Tile map/array.
-  // Hexagonal games assume the even columns are the ones offset vertically.
-  grid: [],
-
-  // An x->y->(co-ord list) mapping, where co-ords are stored as [x,y] arrays.
-  // adjacents[a][b] gives the coords of tiles adjacent to (a,b)
-  adjacents: null,
-
   checkWon: function() {
     if(this.squaresRevealed != this.nonMines) return;
     this.end();
@@ -168,99 +161,72 @@ Game.prototype = {
   end: function() {
     game = null;
     Timer.stop();
-    gameview.onclick = null;
+    this.ended = true;
     ui.pauseCmd.setAttribute("disabled", "true");
   },
 
   fillGrid: function() {
-    const width = this.width, height = this.height, mines = this.mines;
-    const grid = this.grid, adjacents = this.adjacents;
-    const maxx = width - 1, maxy = height - 1;
-    // create the required number of mines, and set the number for other tiles
-    for(var i = 1; i <= mines.length; i++) {
+    const tiles = this.grid.tiles;
+    const max_x = this.width - 1, max_y = this.height - 1;
+    this.mines.forEach((required_num, i) => {
       var minesPlaced = 0;
-      while(minesPlaced != mines[i-1]) {
-        var x, y;
-        do { x = Math.random(); } while(x == 1.0);
-        do { y = Math.random(); } while(y == 1.0);
-        x = Math.floor(x * width);
-        y = Math.floor(y * height);
-        var el = grid[x][y];
-        if(el.mines) continue;
-        if(gNoMinesAtEdges && (!x || x==maxx || !y || y==maxy)) continue;
-        el.mines = i;
+      while(minesPlaced !== required_num) {
+        let tile = tiles[random_int(tiles.length)];
+        if(tile.mines) continue;
+        if(!tile.x || tile.x === max_x || !tile.y || tile.y === max_y) continue;
+        tile.mines = i;
         minesPlaced++;
-        // increment number for surrounding tiles
-        var adjs = adjacents[x][y];
-        for(var j = 0; j != adjs.length; ++j)
-          this.getTile(adjs[j]).number += i;
+        tile.adj.forEach(other => { if(other) other.number += i; });
       }
-    }
-  },
-
-  // Argument is an [x,y] pair as an array (i.e. the format used in .adjacents)
-  getTile: function(coords) {
-    return this.grid[coords[0]][coords[1]];
+    });
   },
 
   revealEdges: function() {
-    const es = this.grid, w = this.width, h = this.height;
-    const maxx = w - 1, maxy = h - 1;
-    for(var y = 0; y != h; ++y) {
-      var el = es[0][y];
-      if(!el.revealed) this.reveal(el);
-      el = es[maxx][y];
-      if(!el.revealed) this.reveal(el);
-    }
-    for(var x = 1; x != maxx; ++x) {
-      el = es[x][0];
-      if(!el.revealed) this.reveal(el);
-      el = es[x][maxy];
-      if(!el.revealed) this.reveal(el);
-    }
+    this.grid.tiles.forEach(tile => {
+      if(tile.x === 0 || tile.x === this.width - 1 || tile.y === 0 || tile.y === this.height - 1) this.reveal(tile);
+    });
   },
 
   updateForGameLost: function() {
-    const els = this.grid, w = this.width, h = this.height;
-    for(var x = 0; x != w; ++x) {
-      for(var y = 0; y != h; ++y) {
-        var el = els[x][y];
-        if(el.mines) {
-          if(el.mines != el.flags) view.update(el, "mine", el.mines);
-        } else {
-          if(el.flags) view.update(el, "cross");
+    this.grid.tiles.forEach(tile => {
+      if(tile.mines) {
+        if(tile.mines !== tile.flags) {
+          ++this.view_versions[tile.id];
+          tile.error = "mine";
+        }
+      } else {
+        if(tile.flags) {
+          ++this.view_versions[tile.id];
+          tile.error = "cross";
         }
       }
-    }
+    });
   },
 
   updateForGameWon: function() {
     // flag remaining mines (also fixes incorrect flag numbers)
-    for(var x = 0; x < this.width; x++) {
-      for(var y = 0; y < this.height; y++) {
-        var el = this.grid[x][y];
-        if(el.mines != el.flags) view.update(el, "flag", el.mines);
+    this.grid.tiles.forEach(tile => {
+      if(tile.mines !== tile.flags) {
+        tile.flags = tile.mines;
+        ++this.view_versions[tile.id];
       }
-    }
+    });
     MineCounters.resetAll();
   },
 
   adjustFlags: function(tile, num) {
     if(tile.flags) MineCounters.increase(tile.flags);
-    if(num) MineCounters.decrease(num);
     tile.flags = num;
-    view.update(tile, "flag", num);
+    if(num) MineCounters.decrease(num);
+    ++this.view_versions[tile.id];
   },
 
-  tileClicked: function(x, y, isRightClick) {
-    const tile = this.grid[x][y];
+  tileClicked: function(tile, isRightClick) {
     if(tile.revealed) {
-      // Reveal surrounding unflagged tiles if there is the correct number of
-      // flags in the surrounding tiles.  (They may be in the wrong place...)
-      const adj = this.adjacents[tile.x][tile.y], num = adj.length;
-      var flags = 0;
-      for(var i = 0; i != num; ++i) flags += this.getTile(adj[i]).flags;
-      if(flags == tile.number) this.revealAround(tile);
+      // Reveal surrounding unflagged tiles if there is the correct number of flags in the surrounding tiles.  (They may be in the wrong place...)
+      let flags = 0;
+      tile.adj.forEach(other => { if(other) flags += other.flags; });
+      if(flags === tile.number) this.revealAround(tile);
     } else if(isRightClick) {
       // Add a flag or remove them all
       this.adjustFlags(tile, tile.flags == this.maxFlags ? 0 : tile.flags + 1);
@@ -274,86 +240,21 @@ Game.prototype = {
   reveal: function(tile) {
     if(tile.mines) {
       this.lose();
-      view.update(tile, "bang", tile.mines);
+      tile.error = "bang";
     } else {
       tile.revealed = true;
       this.squaresRevealed++;
-      view.update(tile, "clear", tile.number);
       if(!tile.number) this.revealAround(tile);
       this.checkWon();
     }
+    ++this.view_versions[tile.id];
   },
 
   revealAround: function(tile) {
-    const adj = this.adjacents[tile.x][tile.y], num = adj.length;
-    for(var i = 0; i != num; ++i) {
-      var el = this.getTile(adj[i]);
-      if(!el.revealed && !el.flags) this.reveal(el);
-    }
-  }
-}
-
-function Tile(x, y) {
-  this.x = x;
-  this.y = y;
-  this.revealed = false;
-  this.flags = 0;
-  this.mines = 0;
-  this.number = 0;
-}
-
-
-// Functions to compute a x -> y -> coord list mapping to adjacent squares
-const computeAdjacents = {};
-
-computeAdjacents.hex = function(width, height) {
-  const map = [];
-  for(var x = 0, even = true; x < width; x++, even = !even) {
-    map[x] = [];
-    for(var y = 0; y < height; y++) {
-      var adj = map[x][y] = [];
-      // y co-ord of tile half-above/below this in *adjacent* columns
-      var up = even ? y : y - 1;
-      var down = even ? y + 1 : y;
-      var left = x - 1, right = x + 1;
-      // up left
-      if(x) {
-        if(down < height) adj.push([left, down]);  // down left
-        if(up >= 0) adj.push([left, up]);          // up left
-      }
-      if(y) adj.push([x, y - 1]);                  // *straight* up
-      if(right < width) {
-        if(up >= 0) adj.push([right, up]);         // up right
-        if(down < height) adj.push([right, down]); // down right
-      }
-      if(y + 1 < height) adj.push([x, y + 1]);     // *straight* down
-    }
-  }
-  return map;
-};
-
-computeAdjacents.sqr = function(width, height) {
-  const map = [];
-  const xmax = width - 1, ymax = height - 1;
-  for(var x = 0; x < width; x++) {
-    map[x] = [];
-    for(var y = 0; y < height; y++) {
-      var adjacent = map[x][y] = [];
-      if(x != 0) {
-        if(y != ymax) adjacent.push([x - 1, y + 1]);
-        if(y != 0) adjacent.push([x - 1, y - 1]);
-        adjacent.push([x - 1, y]);
-      }
-      if(x != xmax) {
-        if(y != ymax) adjacent.push([x + 1, y + 1]);
-        if(y != 0) adjacent.push([x + 1, y - 1]);
-        adjacent.push([x + 1, y]);
-      }
-      if(y != ymax) adjacent.push([x, y + 1]);
-      if(y != 0) adjacent.push([x, y - 1]);
-    }
-  }
-  return map;
+    tile.adj.forEach(el => {
+      if(el && !el.revealed && !el.flags) this.reveal(el);
+    });
+  },
 };
 
 
@@ -414,7 +315,7 @@ var MineCounters = {
     for(var i = 0; i != this.values.length; i++) this.displays[i].textContent = 0;
   },
   setAll: function(newvals) {
-    const vals = this.values = [0].concat(newvals);
+    const vals = this.values = newvals.slice();
     const num = vals.length, ds = this.displays;
     for(var i = 1; i != num; i++) {
       ds[i].textContent = vals[i];
@@ -425,150 +326,20 @@ var MineCounters = {
 }
 
 
-function safeFirstClickHandler(event) {
-  if(event.button || event.ctrlKey || event.shiftKey) return;
-  if(event.target.minesweeperX === undefined) return
-  const t = event.target, x = t.minesweeperX, y = t.minesweeperY;
-  const el = game.grid[x][y];
-  if(!el) return;
+function safeFirstClickHandler(el) {
   // Setting .mines prevents fillGrid() from putting a mine there
   el.mines = 1000;
   game.fillGrid();
   el.mines = 0;
   Timer.start();
-  gameview.onclick = mainClickHandler;
+  game.first_click_handled = true;
   ui.pauseCmd.removeAttribute("disabled");
-  game.tileClicked(x, y, false);
-}
-
-function mainClickHandler(event) {
-  if(event.target.minesweeperX === undefined) return;
-  event.preventDefault();
-  const t = event.target, x = t.minesweeperX, y = t.minesweeperY;
-  game.tileClicked(x, y, event.button || event.ctrlKey || event.shiftKey);
+  game.tileClicked(el, false);
 }
 
 
-
-const SVG = "http://www.w3.org/2000/svg";
-
-// Parameters of the basic hexagonal path being used.  The dimensions are
-// essentially abitrary.
-const slant_width = 37; // width of the left or right sloping part of the hex
-const body_width = 75;  // width of the rectangular middle part of the hex
-const half_height = 65; // half the height of the hex
-const col_width = slant_width + body_width; // useful in layout
-const half_width = 75; // for text positioning
-const sqr_size = 50;
-const half_square = 25;
-
-const _view = {
-  _shape: "",
-  _grid: [],    // An [x][y] array of <svg:g> elements use for the tiles' views
-  _panel: null, // An <svg:g> used to hide the grid as a whole
-  _tile: null,  // A template <svg:g> tile, for cloning
-  // Last dimensions, to save on needless resizing
-  _width: 0,
-  _height: 0,
-
-  init: function() {
-    const shape = document.getElementById(this._shape);
-    shape.id = "";
-    const tile = this._tile = document.createElementNS(SVG, "g");
-    tile.appendChild(shape);
-    const text = document.createElementNS(SVG, "text");
-    text.setAttribute("x", this._textPosition[0]);
-    text.setAttribute("y", this._textPosition[1]);
-    text.appendChild(document.createTextNode(""));
-    tile.appendChild(text);
-    this._panel = document.getElementById(this._shape + "grid");
-    this._grid = [];
-  },
-
-  hide: function() {
-    this._panel.className.baseVal = "hidden";
-  },
-
-  showGrid: function(width, height) {
-    if(this != gOldView) {
-      if(gOldView) gOldView.hide();
-      this._panel.className.baseVal = "";
-      this._resizeViewBox();
-    }
-    if(width != this._width || height != this._height)
-      this._resizeGrid(width, height);
-    const grid = this._grid;
-    const str = this._shape + " tile flag n0"; // see this.update
-    for(var x = 0; x != width; ++x) {
-      for(var y = 0; y != height; ++y) {
-        grid[x][y].className.baseVal = str;
-        grid[x][y]._text.data = "";
-      }
-    }
-  },
-
-  update: function(tile, string, number) {
-    const t = this._grid[tile.x][tile.y];
-    number = number || ""; // hides 0, and ignores missing arguments
-    t.className.baseVal = this._shape + " tile " + string + " n" + number;
-    const str = string == 'flag' && number ? number + '⚑' : number;
-    t._text.data = str;
-  },
-
-  _resizeGrid: function(width, height) {
-    this._width = width; this._height = height;
-    const grid = this._grid, tile = this._tile, panel = this._panel;
-    // Create new tiles and hide existing ones as required
-    for(var x = 0; x < width; ++x) {
-      var col = grid[x] || (grid[x] = []);
-      for(var y = col.length; y < height; ++y) {
-        var t = col[y] = panel.appendChild(this._tile.cloneNode(true));
-        t._text = t.lastChild.firstChild; // The cloned Text Node
-        var pos = this._tilePosition(x, y);
-        // xxx use the DOM?  probably even uglier than this though
-        t.setAttribute("transform", "translate("+pos[0]+","+pos[1]+")");
-        var shape = t.firstChild;
-        shape.minesweeperX = x;
-        shape.minesweeperY = y;
-      }
-      for(y = height; y < col.length; ++y)
-        col[y].className.baseVal = "hidden";
-    }
-    for(x = width; x < grid.length; ++x)
-      for(y = 0; y != grid[x].length; ++y)
-        grid[x][y].className.baseVal = "hidden";
-    this._resizeViewBox();
-  },
-
-  _resizeViewBox: function() {
-    const vb = gameview.viewBox.baseVal;
-    [vb.width, vb.height] = this._viewBoxSize();
-  }
-};
-
-const views = {};
-views.hex = {
-  __proto__: _view,
-  _shape: "hex",
-  _textPosition: [half_width, half_height],
-  _viewBoxSize: function() {
-    const vbWidth = col_width * this._width + slant_width;
-    const vbHeight = half_height * (this._height * 2 + 1);
-    return [vbWidth, vbHeight]
-  },
-  _tilePosition: function(x, y) {
-    const dy = 1 - x % 2; // add a half_height to y in even columns
-    return [col_width * x, half_height * (2 * y + dy)];
-  }
-};
-views.sqr = {
-  __proto__: _view,
-  _shape: "sqr",
-  _textPosition: [half_square, half_square],
-  _viewBoxSize: function() {
-    return [this._width * sqr_size, this._height * sqr_size];
-  },
-  _tilePosition: function(x, y) {
-    return [x * sqr_size, y * sqr_size];
-  }
-};
+function random_int(max) {
+  var r;
+  do { r = Math.random(); } while(r == 1.0);
+  return Math.floor(r * max);
+}

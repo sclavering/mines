@@ -85,10 +85,6 @@ text {
   pointer-events: none;
 }
 
-.hidden {
-  display:none
-}
-
 .shape {
   stroke-width: 1px;
 }
@@ -123,7 +119,7 @@ text {
   dominant-baseline: middle;
 }
 
-.sqr text {
+.sqrdiag text {
   font-size: 30px;
 }
 
