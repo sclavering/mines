@@ -27,7 +27,13 @@ const GridUI = React.createClass({
         const game = this.props.game;
         const shape = game.shape;
         const viewbox = shape === "sqrdiag" ? [game.width * sqr_size, game.height * sqr_size] : [hex_hoffset * game.width + hex_overhang, hex_half_height * (game.height * 2 + 1)];
-        return <svg viewBox={ "0 0 " + viewbox[0] + " " + viewbox[1] } preserveAspectRatio="xMidYMid meet" width="100%" height="100%" style={{ MozUserSelect: "none", fontSize: grid_font_size }}>
+        const style = {
+            fontSize: grid_font_size,
+            fontFamily: "serif",
+            // This stops shift-clicks from selecting some of the tiles' text.
+            MozUserSelect: "none",
+        };
+        return <svg viewBox={ "0 0 " + viewbox[0] + " " + viewbox[1] } preserveAspectRatio="xMidYMid meet" width="100%" height="100%" style={ style }>
             { game.grid.tiles.map(tile => <PureWrapper key={ tile.id } component={ TileWrapper } game={ game } tile={ tile } tile_view_state={ game.view_versions[tile.id] }/>) }
         </svg>;
     },
@@ -41,20 +47,29 @@ function TileWrapper(props) {
     const tile_status_class = tile.error || (tile.revealed ? "clear" : "flag");
     const display_text = tile.error ? tile.mines : tile.revealed ? tile.number : (tile.flags ? tile.flags + "⚑" : "");
     const colour_num = tile.revealed ? tile.number : tile.flags;
-    return <Component tile={ tile } tile_class={ shape + " tile " + tile_status_class } tile_text={ display_text || "" }
+    const text_style = {
+        // The <text> is positioned at the visual center of the tile.  This causes the text to render vertically and horizontally centered in the tile (rather than down and to the right of the center).
+        textAnchor: "middle",
+        dominantBaseline: "middle",
+        // This doesn't really matter for event handling.  But without it, the cursor would become a caret, which is weird.
+        pointerEvents: "none",
+    };
+    return <Component tile={ tile } tile_class={ shape + " tile " + tile_status_class }
         style={{ color: number_colours[colour_num] || null }}
         onclick={ ev => {
             ev.preventDefault();
             if(game) game.click_handler(tile, ev.button || ev.ctrlKey || ev.shiftKey);
         }}
-    />;
+        >
+        <text style={ text_style }>{ display_text || "" }</text>
+    </Component>;
 };
 
 function SquareTile(props) {
-    const transform = "translate(" + (props.tile.x * sqr_size) + "," + (props.tile.y * sqr_size) + ")";
+    const transform = "translate(" + (props.tile.x * sqr_size + sqr_half) + "," + (props.tile.y * sqr_size + sqr_half) + ")";
     return <g transform={ transform } className={ props.tile_class } style={ props.style } onClick={ props.onclick }>
-        <rect className="shape" width={ sqr_size } height={ sqr_size }/>
-        <text x={ sqr_half } y={ sqr_half }>{ props.tile_text }</text>
+        <rect className="shape" x={ -sqr_half } y={ -sqr_half } width={ sqr_size } height={ sqr_size }/>
+        { props.children }
     </g>;
 };
 
@@ -62,7 +77,7 @@ function HexTile(props) {
     const transform = hex_center_translate(props.tile);
     return <g transform={ transform } className={ props.tile_class } style={ props.style } onClick={ props.onclick }>
         <path className="shape" d={ hex_path }/>
-        <text>{ props.tile_text }</text>
+        { props.children }
     </g>;
 };
 

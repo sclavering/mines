@@ -75,16 +75,6 @@ body {
 
 
 
-
-svg {
-  font-family: serif;
-}
-
-/* Ensure the squares or hexes get the events, not the text on them */
-text {
-  pointer-events: none;
-}
-
 .shape {
   stroke-width: 1px;
 }
@@ -107,10 +97,4 @@ text {
 
 .flag text, .clear text {
   fill: currentColor;
-}
-
-.tile text {
-  /* have the co-ords of the element refer to the h- and v-centre of the text */
-  text-anchor: middle;
-  dominant-baseline: middle;
 }
