@@ -12,16 +12,16 @@ const kMines = [null,
 ];
 
 
-var gCurrentDifficulty = 1;
-var gTileShape = 'sqrdiag'; // or 'hex'
-var gMinesPerTile = 1;
-var gNoMinesAtEdges = false;
+var g_settings = {
+  difficulty: 1,
+  shape: "sqrdiag",
+  max_mines_per_tile: 1,
+  no_mines_at_edges: false,
+};
 
 const ui = {
   pauseCmd: 'pause-button',
   pauseMsg: 'msg-pause',
-  settingsOverlay: 'settings-overlay',
-  settingsForm: 'settings-form',
 };
 
 
@@ -39,37 +39,18 @@ window.onload = function() {
 
 function showSettings() {
   if(!paused) togglePause();
-  setRadioValue(ui.settingsForm['f_difficulty'], gCurrentDifficulty);
-  setRadioValue(ui.settingsForm['f_shape'], gTileShape);
-  setRadioValue(ui.settingsForm['f_minespertile'], gMinesPerTile);
-  ui.settingsForm['f_nominesatedges'].checked = gNoMinesAtEdges;
-  ui.settingsOverlay.style.display = 'block';
-}
-
-
-function onSettingsCancelled() {
-  ui.settingsOverlay.style.display = 'none';
-}
-
-
-function onSettingsChanged(form) {
-  gCurrentDifficulty = parseInt(getRadioValue(form['f_difficulty'], 1));
-  gTileShape = getRadioValue(form['f_shape'], 'sqrdiag');
-  gMinesPerTile = parseInt(getRadioValue(form['f_minespertile'], 1));
-  gNoMinesAtEdges = form['f_nominesatedges'].checked;
-  ui.settingsOverlay.style.display = 'none';
-  newGame();
-}
-
-
-function setRadioValue(elements, value) {
-  for(let e of elements) if(e.value == value) e.checked = true;
-}
-
-
-function getRadioValue(elements, default_value) {
-  for(let e of elements) if(e.checked) return e.value;
-  return default_value;
+  const wrapper = document.getElementById("settings-wrapper");
+  const hide_settings = function() { ReactDOM.unmountComponentAtNode(wrapper); };
+  const on_settings_save = function(vals) {
+    g_settings = vals;
+    hide_settings();
+    newGame();
+  };
+  ReactDOM.render(React.createElement(SettingsUI, {
+      settings: g_settings,
+      on_settings_save: on_settings_save,
+      on_settings_cancel: hide_settings,
+    }), wrapper);
 }
 
 
@@ -96,17 +77,17 @@ function show_game(game) {
 function newGame() {
   if(game) game.end();
 
-  const width = kWidths[gCurrentDifficulty];
-  const height = kHeights[gCurrentDifficulty];
-  const mines = kMines[gMinesPerTile][gCurrentDifficulty];
-  const shape = gTileShape;
-  game = new Game(shape, width, height, mines);
+  const settings = g_settings;
+  const width = kWidths[settings.difficulty];
+  const height = kHeights[settings.difficulty];
+  const mines = kMines[settings.max_mines_per_tile][settings.difficulty];
+  game = new Game(settings.shape, width, height, mines);
 
   MineCounters.setAll(mines);
   Timer.reset();
   ui.pauseMsg.style.display = 'none';
   game.gridui = show_game(game);
-  if(gNoMinesAtEdges) {
+  if(settings.no_mines_at_edges) {
     game.fillGrid()
     game.revealEdges();
     game.first_click_handled = true;

@@ -37,31 +37,7 @@
 
 <div id="msg-pause" onclick="togglePause();" style="display:none"><div><div>Paused</div></div></div>
 
-<div id="settings-overlay">
-  <form id="settings-form" onsubmit="event.preventDefault(); onSettingsChanged(this);" action="#">
-    <h6>Difficulty</h6>
-    <label><input type="radio" name="f_difficulty" value="0"/>Beginner</label>
-    <label><input type="radio" name="f_difficulty" value="1"/>Intermediate</label>
-    <label><input type="radio" name="f_difficulty" value="2"/>Expert</label>
-    <h6>Tiles</h6>
-    <label><input type="radio" name="f_shape" value="sqrdiag"/>Square tiles</label>
-    <label><input type="radio" name="f_shape" value="hex"/>Hexagonal tiles</label>
-    <h6>Maxiumum mines per tile</h6>
-    <label><input type="radio" name="f_minespertile" value="1"/>1</label>
-    <label><input type="radio" name="f_minespertile" value="2"/>2</label>
-    <label><input type="radio" name="f_minespertile" value="3"/>3</label>
-    <label><input type="radio" name="f_minespertile" value="4"/>4</label>
-    <label><input type="radio" name="f_minespertile" value="5"/>5</label>
-    <label><input type="radio" name="f_minespertile" value="6"/>6</label>
-    <label><input type="radio" name="f_minespertile" value="7"/>7</label>
-    <h6>Misc</h6>
-    <label><input type="checkbox" id="f_nominesatedges" name="nominesatedges"/>No mines at edges</label>
-    <p>
-      <input type="button" value="Cancel" onclick="onSettingsCancelled();"/>
-      <input type="submit" value="OK"/>
-    </p>
-  </form>
-</div>
+<div id="settings-wrapper"></div>
 
 </body>
 </html>

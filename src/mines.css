@@ -33,10 +33,12 @@ body {
   width: 80px;
 }
 
+#msg-pause {
+  display: none;
+}
 
 #settings-overlay,
 #msg-pause {
-  display: none;
   position: fixed;
   top: 0;
   right: 0;
@@ -55,7 +57,7 @@ body {
 
 #settings-overlay h6 {
   font-size: 1em;
-  margin: 1em 0;
+  margin: 1.5em 0 0.5em;
 }
 
 

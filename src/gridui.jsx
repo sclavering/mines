@@ -117,3 +117,40 @@ const PureWrapper = React.createClass({
         return React.createElement(this.props.component, this.props);
     },
 });
+
+
+function SettingsUI(props) {
+    const on_submit = ev => {
+        ev.preventDefault();
+        const form = ev.target;
+        const settings = {
+            difficulty: +form.elements["difficulty"].value,
+            shape: form.elements["shape"].value,
+            max_mines_per_tile: +form.elements["max_mines_per_tile"].value,
+            nominesatedges: form.elements["nominesatedges"].checked,
+        };
+        props.on_settings_save(settings);
+    };
+    const settings = props.settings;
+    const radios = (name, nums) => nums.map(n => <label key={ n }><input type="radio" name={ name } value={ n } defaultChecked={ n === settings[name] }/>{ n } </label>);
+    const radios_map = (name, m) => Object.keys(m).map(val => <label key={ val }><input type="radio" name={ name } value={ val } defaultChecked={ val == settings[name] }/>{ m[val] } </label>);
+    return <div id="settings-overlay">
+        <form id="settings-form" onSubmit={ on_submit }>
+            <h6>Difficulty</h6>
+            { radios_map("difficulty", { 0: "Beginner", 1: "Intermediate", 2: "Expert" }) }
+            <h6>Tiles</h6>
+            { radios_map("shape", { "sqrdiag": "Square tiles", "hex": "Hexagonal tiles" }) }
+            <h6>Maximum mines per tile</h6>
+            { radios("max_mines_per_tile", [1, 2, 3, 4, 5, 6, 7]) }
+            <h6>Misc</h6>
+            <label>
+              <input id="wrap" type="checkbox" name="nominesatedges" defaultChecked={ settings.nominesatedges }/>
+              No mines at edges
+            </label>
+            <p>
+              <input type="button" value="Cancel" onClick={ props.on_settings_cancel }/>
+              <input type="submit" value="Save"/>
+            </p>
+        </form>
+    </div>;
+};
