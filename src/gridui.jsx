@@ -1,11 +1,15 @@
-// Parameters of the basic hexagonal path being used.  The dimensions are essentially abitrary.
-const slant_width = 37; // width of the left or right sloping part of the hex
-const body_width = 75;  // width of the rectangular middle part of the hex
-const half_height = 65; // half the height of the hex
-const col_width = slant_width + body_width; // useful in layout
-const half_width = 75; // for text positioning
-const sqr_size = 50;
-const half_square = 25;
+const sqr_size = 130;
+const sqr_half = 65;
+
+const hex_height = 130;
+const hex_half_height = 65;
+const hex_half_width = 74;
+const hex_hoffset = 111; // width of left point and rectangular body together
+const hex_overhang = 37; // width of right point
+const hex_node_radius = 30;
+const hex_path = `M -${hex_half_width},0 L -${hex_overhang},-${hex_half_height} ${hex_overhang},-${hex_half_height} ${hex_half_width},0 ${hex_overhang},${hex_half_height} -${hex_overhang},${hex_half_height} z`;
+
+const grid_font_size = 70;
 
 const number_colours = {
     1: "blue",
@@ -22,8 +26,8 @@ const GridUI = React.createClass({
     render(props) {
         const game = this.props.game;
         const shape = game.shape;
-        const viewbox = shape === "sqrdiag" ? [game.width * sqr_size, game.height * sqr_size] : [col_width * game.width + slant_width, half_height * (game.height * 2 + 1)];
-        return <svg viewBox={ "0 0 " + viewbox[0] + " " + viewbox[1] } preserveAspectRatio="xMidYMid meet" width="100%" height="100%" style={{ MozUserSelect: "none" }}>
+        const viewbox = shape === "sqrdiag" ? [game.width * sqr_size, game.height * sqr_size] : [hex_hoffset * game.width + hex_overhang, hex_half_height * (game.height * 2 + 1)];
+        return <svg viewBox={ "0 0 " + viewbox[0] + " " + viewbox[1] } preserveAspectRatio="xMidYMid meet" width="100%" height="100%" style={{ MozUserSelect: "none", fontSize: grid_font_size }}>
             { game.grid.tiles.map(tile => <PureWrapper key={ tile.id } component={ TileWrapper } game={ game } tile={ tile } tile_view_state={ game.view_versions[tile.id] }/>) }
         </svg>;
     },
@@ -49,17 +53,23 @@ function TileWrapper(props) {
 function SquareTile(props) {
     const transform = "translate(" + (props.tile.x * sqr_size) + "," + (props.tile.y * sqr_size) + ")";
     return <g transform={ transform } className={ props.tile_class } style={ props.style } onClick={ props.onclick }>
-        <path className="shape" d="M 0,0 L 50,0 50,50 0,50 z"/>
-        <text x={ half_square } y={ half_square }>{ props.tile_text }</text>
+        <rect className="shape" width={ sqr_size } height={ sqr_size }/>
+        <text x={ sqr_half } y={ sqr_half }>{ props.tile_text }</text>
     </g>;
 };
 
 function HexTile(props) {
-    const transform = "translate(" + (props.tile.x * col_width) + "," + ((2 * props.tile.y + (props.tile.x % 2 ? 0 : 1)) * half_height) + ")";
+    const transform = hex_center_translate(props.tile);
     return <g transform={ transform } className={ props.tile_class } style={ props.style } onClick={ props.onclick }>
-        <path className="shape" d="M 112,0 L 37,0 L 0,65 L 37,130 L 112,130 L 149,65 z"/>
-        <text x={ half_width } y={ half_height }>{ props.tile_text }</text>
+        <path className="shape" d={ hex_path }/>
+        <text>{ props.tile_text }</text>
     </g>;
+};
+
+function hex_center_translate(tile) {
+    const x = tile.x * hex_hoffset + hex_half_width;
+    const y = tile.y * hex_height + hex_half_height + (tile.x % 2 ? 0 : hex_half_height);
+    return "translate(" + x + "," + y + ")";
 };
 
 

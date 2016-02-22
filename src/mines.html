@@ -38,7 +38,7 @@
 <div id="msg-pause" onclick="togglePause();" style="display:none"><div><div>Paused</div></div></div>
 
 <div id="settings-overlay">
-  <form id="settings-form" onsubmit="onSettingsChanged(this); return false" action="#">
+  <form id="settings-form" onsubmit="event.preventDefault(); onSettingsChanged(this);" action="#">
     <h6>Difficulty</h6>
     <label><input type="radio" name="f_difficulty" value="0"/>Beginner</label>
     <label><input type="radio" name="f_difficulty" value="1"/>Intermediate</label>
