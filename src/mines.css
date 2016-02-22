@@ -72,29 +72,3 @@ body {
   position: relative;
   top: 40%;
 }
-
-
-
-.shape {
-  stroke-width: 1px;
-}
-.clear .shape {
-  stroke: grey;
-  fill: lightgrey;
-}
-.flag .shape {
-  stroke: black;
-  fill: darkgrey;
-}
-.mine .shape {
-  stroke: black;
-  fill: orange;
-}
-.bang .shape {
-  stroke: grey;
-  fill: red;
-}
-
-.flag text, .clear text {
-  fill: currentColor;
-}

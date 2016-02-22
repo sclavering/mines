@@ -21,6 +21,25 @@ const number_colours = {
     7: "#840084",
 };
 
+const tile_colour_styles = {
+    "clear": {
+        stroke: "gray",
+        fill: "lightgray",
+    },
+    "flag": {
+        stroke: "black",
+        fill: "darkgray",
+    },
+    "mine": {
+        stroke: "black",
+        fill: "orange",
+    },
+    "bang": {
+        stroke: "gray",
+        fill: "red",
+    },
+};
+
 
 const GridUI = React.createClass({
     render(props) {
@@ -44,7 +63,7 @@ function TileWrapper(props) {
     const Component = shape === "sqrdiag" ? SquareTile : HexTile;
     const tile_view_state = props.tile_view_state;
     const tile = props.tile;
-    const tile_status_class = tile.error || (tile.revealed ? "clear" : "flag");
+    const bg_style = tile_colour_styles[tile.error || (tile.revealed ? "clear" : "flag")];
     const display_text = tile.error ? tile.mines : tile.revealed ? tile.number : (tile.flags ? tile.flags + "⚑" : "");
     const colour_num = tile.revealed ? tile.number : tile.flags;
     const text_style = {
@@ -54,8 +73,8 @@ function TileWrapper(props) {
         // This doesn't really matter for event handling.  But without it, the cursor would become a caret, which is weird.
         pointerEvents: "none",
     };
-    return <Component tile={ tile } tile_class={ shape + " tile " + tile_status_class }
-        style={{ color: number_colours[colour_num] || null }}
+    return <Component tile={ tile } bg_style={ bg_style }
+        style={{ fill: number_colours[colour_num] || null }}
         onclick={ ev => {
             ev.preventDefault();
             if(game) game.click_handler(tile, ev.button || ev.ctrlKey || ev.shiftKey);
@@ -67,16 +86,16 @@ function TileWrapper(props) {
 
 function SquareTile(props) {
     const transform = "translate(" + (props.tile.x * sqr_size + sqr_half) + "," + (props.tile.y * sqr_size + sqr_half) + ")";
-    return <g transform={ transform } className={ props.tile_class } style={ props.style } onClick={ props.onclick }>
-        <rect className="shape" x={ -sqr_half } y={ -sqr_half } width={ sqr_size } height={ sqr_size }/>
+    return <g transform={ transform } style={ props.style } onClick={ props.onclick }>
+        <rect x={ -sqr_half } y={ -sqr_half } width={ sqr_size } height={ sqr_size } style={ props.bg_style }/>
         { props.children }
     </g>;
 };
 
 function HexTile(props) {
     const transform = hex_center_translate(props.tile);
-    return <g transform={ transform } className={ props.tile_class } style={ props.style } onClick={ props.onclick }>
-        <path className="shape" d={ hex_path }/>
+    return <g transform={ transform } style={ props.style } onClick={ props.onclick }>
+        <path d={ hex_path } style={ props.bg_style }/>
         { props.children }
     </g>;
 };
