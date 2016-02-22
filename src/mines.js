@@ -22,6 +22,7 @@ var g_settings = {
 const ui = {
   pauseCmd: 'pause-button',
   pauseMsg: 'msg-pause',
+  time_and_mine_counters: "counter-wrapper",
 };
 
 
@@ -31,8 +32,6 @@ var paused = false;
 // This is assumed to happen after the SVG document is loaded too. Seems to work :)
 window.onload = function() {
   for(var i in ui) ui[i] = document.getElementById(ui[i]);
-  Timer.init();
-  MineCounters.init();
   newGame();
 };
 
@@ -67,6 +66,11 @@ function togglePause() {
 }
 
 
+function update_time_and_mine_counters() {
+  ReactDOM.render(React.createElement(TimeAndMineCounters, { time: Timer.time, mine_counts: game ? game.mine_counts : [] }), ui.time_and_mine_counters);
+}
+
+
 function show_game(game) {
   const wrapper = document.getElementById("wrapper");
   ReactDOM.unmountComponentAtNode(wrapper);
@@ -83,7 +87,7 @@ function newGame() {
   const mines = kMines[settings.max_mines_per_tile][settings.difficulty];
   game = new Game(settings.shape, width, height, mines);
 
-  MineCounters.setAll(mines);
+  game.mine_counts = mines.slice();
   Timer.reset();
   ui.pauseMsg.style.display = 'none';
   game.gridui = show_game(game);
@@ -94,6 +98,7 @@ function newGame() {
     ui.pauseCmd.removeAttribute("disabled");
     Timer.start();
   }
+  update_time_and_mine_counters();
 };
 
 function Game(shape, width, height, mines) {
@@ -192,13 +197,15 @@ Game.prototype = {
         ++this.view_versions[tile.id];
       }
     });
-    MineCounters.resetAll();
+    this.mine_counts.fill(0);
+    update_time_and_mine_counters();
   },
 
   adjustFlags: function(tile, num) {
-    if(tile.flags) MineCounters.increase(tile.flags);
+    if(tile.flags) ++this.mine_counts[tile.flags];
     tile.flags = num;
-    if(num) MineCounters.decrease(num);
+    if(num) --this.mine_counts[num];
+    update_time_and_mine_counters();
     ++this.view_versions[tile.id];
   },
 
@@ -242,7 +249,6 @@ Game.prototype = {
 var Timer = {
   interval: null,
   time: 0,
-  display: null,
 
   init: function() {
     this.display = document.getElementById("timer");
@@ -253,58 +259,19 @@ var Timer = {
   },
 
   increment: function() {
-    Timer.display.textContent = (++Timer.time);
+    ++Timer.time;
+    update_time_and_mine_counters();
   },
 
   stop: function() {
     clearInterval(this.interval);
-    return this.time;
   },
 
   reset: function() {
     this.time = 0;
-    this.display.textContent = 0;
-  }
-}
-
-
-
-var MineCounters = {
-  values: [],
-  // These hold a dummy object for the non-existent 0-mines counter
-  displays: [{}],
-
-  init: function() {
-    var i = 1;
-    while(true) {
-      var elt = document.getElementById("mine-counter-" + i++);
-      if(!elt) break;
-      this.displays.push(elt);
-    }
+    update_time_and_mine_counters();
   },
-
-  increase: function(c) {
-    this.values[c]++;
-    this.displays[c].textContent = this.values[c];
-  },
-  decrease: function(c) {
-    this.values[c]--;
-    this.displays[c].textContent = this.values[c];
-  },
-
-  resetAll: function() {
-    for(var i = 0; i != this.values.length; i++) this.displays[i].textContent = 0;
-  },
-  setAll: function(newvals) {
-    const vals = this.values = newvals.slice();
-    const num = vals.length, ds = this.displays;
-    for(var i = 1; i != num; i++) {
-      ds[i].textContent = vals[i];
-      ds[i].parentNode.parentNode.style.visibility = 'visible';
-    }
-    for(; i != ds.length; i++) ds[i].parentNode.parentNode.style.visibility = 'hidden';
-  }
-}
+};
 
 
 function safeFirstClickHandler(el) {

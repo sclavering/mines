@@ -119,6 +119,17 @@ const PureWrapper = React.createClass({
 });
 
 
+function TimeAndMineCounters(props) {
+    return <table><tbody>
+        <tr><th>Time</th><td>{ props.time }</td></tr>
+        { props.mine_counts.map((num, ix) => ix ? <tr key={ ix }>
+            <th style={{ color: number_colours[ix], minWidth: "2ex" }}>1⚑</th>
+            <td>{ num }</td>
+        </tr> : null) }
+    </tbody></table>;
+};
+
+
 function SettingsUI(props) {
     const on_submit = ev => {
         ev.preventDefault();
