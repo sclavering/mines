@@ -6,7 +6,6 @@ const hex_half_height = 65;
 const hex_half_width = 74;
 const hex_hoffset = 111; // width of left point and rectangular body together
 const hex_overhang = 37; // width of right point
-const hex_node_radius = 30;
 const hex_path = `M -${hex_half_width},0 L -${hex_overhang},-${hex_half_height} ${hex_overhang},-${hex_half_height} ${hex_half_width},0 ${hex_overhang},${hex_half_height} -${hex_overhang},${hex_half_height} z`;
 
 const grid_font_size = 70;
