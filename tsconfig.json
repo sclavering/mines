@@ -4,6 +4,10 @@
         "jsx": "react",
         "target": "ES5",
         "outFile": "src/tsc_output.js",
+
+        "typeRoots": [
+            "node_modules/@types/",
+        ],
     },
     "files": [
         "src/gridutil.tsx",
