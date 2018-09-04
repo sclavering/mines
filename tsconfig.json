@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        // "noImplicitAny": true,
+        "jsx": "react",
+        "target": "ES5",
+        "outFile": "src/tsc_output.js",
+    },
+    "files": [
+        "src/gridutil.tsx",
+        "src/gridui.tsx",
+        "src/mines.ts",
+    ],
+}
